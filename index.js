@@ -21,6 +21,15 @@ var db = mysql.createConnection({
   ssl: { ca: fs.readFileSync(process.env.DBCERTIFICATEFILEPATH) },
 });
 
+db.connect((err) => {
+  if (err) {
+    throw err;
+  }
+  console.log(
+    `The server has successfully connected to ${process.env.DBSERVERDATABASENAME}`
+  );
+});
+
 app.listen(PORT, () =>
   console.log(`The server is running and listening on port: ${PORT}`)
 );
