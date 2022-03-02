@@ -3,6 +3,7 @@ const express = require('express');
 const mysql = require('mysql');
 const fs = require('fs');
 const cors = require('cors');
+const e = require('express');
 require('dotenv').config();
 
 //Package setup
@@ -59,6 +60,20 @@ app.post('/register', (req, res) => {
 app.post('/login', (req, res) => {
   const username = req.body.username;
   const password = req.body.password;
+  db.query(
+    'SELECT username, password FROM studentbee.tbl_user_login_information where username = ? and password = ?',
+    [username, password],
+    (err, result) => {
+      if (err) {
+        res.send({ error: err });
+      }
+      if (result) {
+        res.send({ result: result });
+      } else {
+        res.send({ message: 'Wrong username/password combination' });
+      }
+    }
+  );
 });
 
 app.listen(PORT, () =>
