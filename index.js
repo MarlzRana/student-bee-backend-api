@@ -31,8 +31,12 @@ db.connect((err) => {
     throw err;
   }
   console.log(
-    `The server has successfully connected to ${process.env.DBSERVERDATABASENAME}`
+    `The server has successfully connected to the database: ${process.env.DBSERVERDATABASENAME}`
   );
+});
+
+app.get('/', (req, res) => {
+  res.send({ message: 'Default gateway of student-bee-backend-api' });
 });
 
 app.post('/register', (req, res) => {
@@ -43,12 +47,18 @@ app.post('/register', (req, res) => {
     [username, password],
     (err, result) => {
       if (err) {
-        res.send(err);
+        console.log(err);
+        res.send({ status: 'FAILURE' });
       } else {
         res.send({ status: 'SUCCESS' });
       }
     }
   );
+});
+
+app.post('/login', (req, res) => {
+  const username = req.body.username;
+  const password = req.body.password;
 });
 
 app.listen(PORT, () =>
