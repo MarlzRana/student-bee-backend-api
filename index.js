@@ -27,6 +27,7 @@ var db = mysql.createConnection({
   ssl: { ca: fs.readFileSync(process.env.DBCERTIFICATEFILEPATH) },
 });
 
+//Testing our connection to the database
 db.connect((err) => {
   if (err) {
     throw err;
@@ -36,10 +37,12 @@ db.connect((err) => {
   );
 });
 
+//A default gateway to test if API server is accessible
 app.get('/', (req, res) => {
   res.send({ message: 'Default gateway of student-bee-backend-api' });
 });
 
+//POST request logic to handle the registration of a user
 app.post('/register', (req, res) => {
   const username = req.body.username;
   const password = req.body.password;
@@ -57,6 +60,7 @@ app.post('/register', (req, res) => {
   );
 });
 
+//POST request logic to handle the login of a user
 app.post('/login', (req, res) => {
   const username = req.body.username;
   const password = req.body.password;
@@ -76,6 +80,7 @@ app.post('/login', (req, res) => {
   );
 });
 
+//Tells the API what port to listen to and display's that port in the console
 app.listen(PORT, () =>
   console.log(`The server is running and listening on port: ${PORT}`)
 );
