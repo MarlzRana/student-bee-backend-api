@@ -68,9 +68,9 @@ app.post('/login', (req, res) => {
         res.send({ error: err });
       }
       if (result.length > 0) {
-        res.send({ result: result });
+        res.send({ status: 'validCredentials' });
       } else {
-        res.send({ message: 'Wrong username/password combination' });
+        res.send({ status: 'invalidCredentials' });
       }
     }
   );
