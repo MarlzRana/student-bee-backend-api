@@ -3,28 +3,31 @@ const express = require('express');
 const mysql = require('mysql');
 const fs = require('fs');
 const cors = require('cors');
-const e = require('express');
 require('dotenv').config();
 
-//Package setup
-
-// //Environmental variables
+//Environmental variables
 const PORT = process.env.PORT;
-const app = express();
+const DBHOSTSERVERADDRESS = process.env.DBHOSTSERVERADDRESS;
+const DBSERVERUSERNAME = process.env.DBSERVERUSERNAME;
+const DBSERVERPASSWORD = process.env.DBSERVERPASSWORD;
+const DBSERVERDATABASENAME = process.env.DBSERVERDATABASENAME;
+const DBSERVERPORT = process.env.DBSERVERPORT;
+const DBCERTIFICATEFILEPATH = process.env.DBCERTIFICATEFILEPATH;
 
-// //Package parameter setup
+//Package setup
+const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 
 //Setting up the database connection
 var db = mysql.createConnection({
-  host: process.env.DBHOSTSERVERADDRESS,
-  user: process.env.DBSERVERUSERNAME,
-  password: process.env.DBSERVERPASSWORD,
-  database: process.DBSERVERDATABASENAME,
-  port: process.env.DBSERVERPORT,
-  ssl: { ca: fs.readFileSync(process.env.DBCERTIFICATEFILEPATH) },
+  host: DBHOSTSERVERADDRESS,
+  user: DBSERVERUSERNAME,
+  password: DBSERVERPASSWORD,
+  database: DBSERVERDATABASENAME,
+  port: DBSERVERPORT,
+  ssl: { ca: fs.readFileSync(DBCERTIFICATEFILEPATH) },
 });
 
 //Testing our connection to the database
@@ -33,7 +36,7 @@ db.connect((err) => {
     throw err;
   }
   console.log(
-    `The server has successfully connected to the database: ${process.env.DBSERVERDATABASENAME}`
+    `The server has successfully connected to the database: ${DBSERVERDATABASENAME}`
   );
 });
 
