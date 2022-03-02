@@ -3,6 +3,7 @@ const express = require('express');
 const mysql = require('mysql');
 const fs = require('fs');
 const cors = require('cors');
+const bcrypt = require('bcrypt');
 require('dotenv').config();
 
 //Environmental variables
@@ -13,6 +14,7 @@ const DBSERVERPASSWORD = process.env.DBSERVERPASSWORD;
 const DBSERVERDATABASENAME = process.env.DBSERVERDATABASENAME;
 const DBSERVERPORT = process.env.DBSERVERPORT;
 const DBCERTIFICATEFILEPATH = process.env.DBCERTIFICATEFILEPATH;
+const SALTROUNDS = parseInt(process.env.SALTROUNDS);
 
 //Package setup
 const app = express();
@@ -47,37 +49,60 @@ app.get('/', (req, res) => {
 
 //POST request logic to handle the registration of a user
 app.post('/register', (req, res) => {
+  //Get the entered username and password from the request body
   const username = req.body.username;
   const password = req.body.password;
-  db.query(
-    'INSERT INTO studentbee.tbl_user_login_information (username, password) VALUES (?, ?)',
-    [username, password],
-    (err, result) => {
-      if (err) {
-        console.log(err);
-        res.send({ status: 'FAILURE' });
-      } else {
-        res.send({ status: 'SUCCESS' });
-      }
-    }
+  //Generate salt to hash the entered password
+  bcrypt.genSalt(SALTROUNDS).then((salt) =>
+    // Hash the password with the generated salt
+    bcrypt.hash(password, salt).then((hashedPassword) => {
+      //Insert the user into the database with their respectively hashed password
+      db.query(
+        'INSERT INTO studentbee.tbl_user_login_information (username, password) VALUES (?, ?)',
+        [username, hashedPassword],
+        (dbErr, dbResult) => {
+          if (dbErr) {
+            console.log(dbErr);
+            res.send({ status: 'FAILURE' });
+          } else {
+            res.send({ status: 'SUCCESS' });
+          }
+        }
+      );
+    })
   );
 });
 
 //POST request logic to handle the login of a user
 app.post('/login', (req, res) => {
-  const username = req.body.username;
-  const password = req.body.password;
+  const enteredUsername = req.body.username;
+  const enteredPassword = req.body.password;
+  //Get the hashed password of a user with that username
   db.query(
-    'SELECT username, password FROM studentbee.tbl_user_login_information where username = ? and password = ?',
-    [username, password],
-    (err, result) => {
-      if (err) {
-        res.send({ error: err });
-      }
-      if (result.length > 0) {
-        res.send({ status: 'validCredentials' });
+    'SELECT username, password FROM studentbee.tbl_user_login_information where username = ?',
+    [enteredUsername],
+    (dbErr, dbResult) => {
+      if (dbErr) {
+        res.send({ error: dbErr });
       } else {
-        res.send({ status: 'invalidCredentials' });
+        if (dbResult.length > 0) {
+          //Hash the enteredPassword using the salt found prepended to the hashed password in the database
+          bcrypt.compare(
+            enteredPassword,
+            dbResult[0].password,
+            (bcryptError, bcryptResult) => {
+              //Return the appropriate response depending on the enteredPassword == hashedPasswordInDB
+              if (bcryptResult) {
+                res.send({ status: 'validCredentials' });
+              } else {
+                res.send({ status: 'incorrectPassword' });
+              }
+            }
+          );
+        } else {
+          //If the username does not exist return
+          res.send({ status: 'nonExistentUsername' });
+        }
       }
     }
   );
