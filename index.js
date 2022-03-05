@@ -4,6 +4,9 @@ const mysql = require('mysql');
 const fs = require('fs');
 const cors = require('cors');
 const bcrypt = require('bcrypt');
+const bodyParser = require('body-parser');
+const cookieParser = require('cookie-parser');
+const session = require('express-session');
 require('dotenv').config();
 
 //Environmental variables
@@ -20,7 +23,23 @@ const SALTROUNDS = parseInt(process.env.SALTROUNDS);
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(cors());
+app.use(
+  cors({
+    origin: ['http://localhost:3000'],
+    methods: ['GET', 'POST'],
+    credentials: true,
+  })
+);
+app.use(cookieParser());
+app.use(
+  session({
+    key: '',
+    secret: 'testSecret',
+    resave: false,
+    saveUninitialized: false,
+    cookie: { expires: 86400 },
+  })
+);
 
 //Setting up the database connection
 var db = mysql.createConnection({
@@ -73,13 +92,22 @@ app.post('/register', (req, res) => {
   );
 });
 
+app.get('/login', (req, res) => {
+  req.session.user;
+  if (req.session.user) {
+    res.send({ loggedIn: true, user: req.session.user });
+  } else {
+    res.send({ loggedIn: false });
+  }
+});
+
 //POST request logic to handle the login of a user
 app.post('/login', (req, res) => {
   const enteredUsername = req.body.username;
   const enteredPassword = req.body.password;
   //Get the hashed password of a user with that username
   db.query(
-    'SELECT username, password FROM studentbee.tbl_user_login_information where username = ?',
+    'SELECT user_id, username, password FROM studentbee.tbl_user_login_information where username = ?',
     [enteredUsername],
     (dbErr, dbResult) => {
       if (dbErr) {
@@ -93,6 +121,8 @@ app.post('/login', (req, res) => {
             (bcryptError, bcryptResult) => {
               //Return the appropriate response depending on the enteredPassword == hashedPasswordInDB
               if (bcryptResult) {
+                req.session.user = dbResult;
+                console.log(req.session.user);
                 res.send({ status: 'validCredentials' });
               } else {
                 res.send({ status: 'incorrectPassword' });
