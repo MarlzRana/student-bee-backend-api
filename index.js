@@ -37,7 +37,7 @@ app.use(
     secret: 'testSecret',
     resave: false,
     saveUninitialized: false,
-    cookie: { expires: 86400 },
+    cookie: { maxAge: 24 * 60 * 60 * 1000 },
   })
 );
 
