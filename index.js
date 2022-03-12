@@ -92,12 +92,12 @@ app.post('/register', (req, res) => {
   );
 });
 
-app.get('/login', (req, res) => {
-  req.session.user;
+app.get('/isLoggedIn', (req, res) => {
+  console.log(req.session);
   if (req.session.user) {
-    res.send({ loggedIn: true, user: req.session.user });
+    res.send({ isLoggedIn: true, user: req.session.user });
   } else {
-    res.send({ loggedIn: false });
+    res.send({ isLoggedIn: false });
   }
 });
 
@@ -122,7 +122,6 @@ app.post('/login', (req, res) => {
               //Return the appropriate response depending on the enteredPassword == hashedPasswordInDB
               if (bcryptResult) {
                 req.session.user = dbResult;
-                console.log(req.session.user);
                 res.send({ status: 'validCredentials' });
               } else {
                 res.send({ status: 'incorrectPassword' });
