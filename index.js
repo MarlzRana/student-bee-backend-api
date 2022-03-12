@@ -55,17 +55,19 @@ const dbConfig = {
   queueLimit: 0,
 };
 const db = mysql2.createPool(dbConfig);
-var oldDBConnection = mysql.createConnection(dbConfig);
 
 //Testing our connection to the database
-oldDBConnection.connect((err) => {
-  if (err) {
-    throw err;
+const testDbConnection = async () => {
+  try {
+    await db.query(
+      'SELECT * from tbl_user_login_information WHERE username="user"'
+    );
+    console.log('The server is connected to studentbee-db');
+  } catch (error) {
+    console.log('WARNING: Server not connected to studentbee-db');
   }
-  console.log(
-    `The server has successfully connected to the database: ${DBSERVERDATABASENAME}`
-  );
-});
+};
+testDbConnection();
 
 //A default gateway to test if API server is accessible
 app.get('/', (req, res) => {
@@ -73,33 +75,35 @@ app.get('/', (req, res) => {
 });
 
 //POST request logic to handle the registration of a user
-app.post('/register', (req, res) => {
-  //Get the entered username and password from the request body
-  const username = req.body.username;
-  const password = req.body.password;
-  //Generate salt to hash the entered password
-  bcrypt.genSalt(SALTROUNDS).then((salt) =>
-    // Hash the password with the generated salt
-    bcrypt.hash(password, salt).then((hashedPassword) => {
-      //Insert the user into the database with their respectively hashed password
-      oldDBConnection.query(
-        'INSERT INTO studentbee.tbl_user_login_information (username, password) VALUES (?, ?)',
-        [username, hashedPassword],
-        (dbErr, dbResult) => {
-          if (dbErr) {
-            console.log(dbErr);
-            res.send({ status: 'FAILURE' });
-          } else {
-            res.send({ status: 'SUCCESS' });
-          }
-        }
-      );
-    })
-  );
+app.post('/register', async (req, res) => {
+  try {
+    //Get the entered username and password
+    const enteredUsername = req.body.username;
+    const enteredPassword = req.body.password;
+    //Check is a user already exists with that username
+    const [dbResult] = await db.query(
+      'SELECT username FROM tbl_user_login_information WHERE username = ?',
+      [enteredUsername]
+    );
+    if (dbResult.length > 0) {
+      return res.send({ status: 'usernameIsTaken' });
+    }
+    //Create the salt to use and then hash the enteredPassword to be
+    const saltToUse = await bcrypt.genSalt(SALTROUNDS);
+    const hashedPassword = await bcrypt.hash(enteredPassword, saltToUse);
+    await db.query(
+      'INSERT INTO tbl_user_login_information (username, password) VALUES (?, ?)',
+      [enteredUsername, hashedPassword]
+    );
+    return res.send({ status: 'success' });
+  } catch (err) {
+    console.log(err);
+    return res.send({ error: true });
+  }
 });
 
+//GET request that reads and compares the cookie sent to active cookies on the server to check is a user is logged in
 app.get('/isLoggedIn', (req, res) => {
-  console.log(req.session);
   if (req.session.user) {
     res.send({ isLoggedIn: true, user: req.session.user });
   } else {
@@ -107,12 +111,13 @@ app.get('/isLoggedIn', (req, res) => {
   }
 });
 
+//POST request used to login and create a login session with a cookie
 app.post('/login', async (req, res) => {
   try {
     const enteredUsername = req.body.username;
     const enteredPassword = req.body.password;
     const [dbResult] = await db.query(
-      'SELECT username, password FROM studentbee.tbl_user_login_information where username = ?',
+      'SELECT username, password FROM tbl_user_login_information where username = ?',
       [enteredUsername]
     );
     if (dbResult.length < 1) {
@@ -137,42 +142,6 @@ app.post('/login', async (req, res) => {
     console.log(err);
     return res.send({ error: true });
   }
-});
-
-//POST request logic to handle the login of a user
-app.post('/OldLogin', (req, res) => {
-  const enteredUsername = req.body.username;
-  const enteredPassword = req.body.password;
-  //Get the hashed password of a user with that username
-  oldDBConnection.query(
-    'SELECT user_id, username, password FROM studentbee.tbl_user_login_information where username = ?',
-    [enteredUsername],
-    (dbErr, dbResult) => {
-      if (dbErr) {
-        res.send({ error: dbErr });
-      } else {
-        if (dbResult.length > 0) {
-          //Hash the enteredPassword using the salt found prepended to the hashed password in the database
-          bcrypt.compare(
-            enteredPassword,
-            dbResult[0].password,
-            (bcryptError, bcryptResult) => {
-              //Return the appropriate response depending on the enteredPassword == hashedPasswordInDB
-              if (bcryptResult) {
-                req.session.user = dbResult;
-                res.send({ status: 'validCredentials' });
-              } else {
-                res.send({ status: 'incorrectPassword' });
-              }
-            }
-          );
-        } else {
-          //If the username does not exist return
-          res.send({ status: 'nonExistentUsername' });
-        }
-      }
-    }
-  );
 });
 
 //Tells the API what port to listen to and display's that port in the console
