@@ -1,6 +1,7 @@
 //Imported packages
 const express = require('express');
 const mysql = require('mysql');
+const mysql2 = require('mysql2/promise');
 const fs = require('fs');
 const cors = require('cors');
 const bcrypt = require('bcrypt');
@@ -42,17 +43,22 @@ app.use(
 );
 
 //Setting up the database connection
-var db = mysql.createConnection({
+const dbConfig = {
   host: DBHOSTSERVERADDRESS,
   user: DBSERVERUSERNAME,
   password: DBSERVERPASSWORD,
   database: DBSERVERDATABASENAME,
   port: DBSERVERPORT,
   ssl: { ca: fs.readFileSync(DBCERTIFICATEFILEPATH) },
-});
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0,
+};
+const db = mysql2.createPool(dbConfig);
+var oldDBConnection = mysql.createConnection(dbConfig);
 
 //Testing our connection to the database
-db.connect((err) => {
+oldDBConnection.connect((err) => {
   if (err) {
     throw err;
   }
@@ -76,7 +82,7 @@ app.post('/register', (req, res) => {
     // Hash the password with the generated salt
     bcrypt.hash(password, salt).then((hashedPassword) => {
       //Insert the user into the database with their respectively hashed password
-      db.query(
+      oldDBConnection.query(
         'INSERT INTO studentbee.tbl_user_login_information (username, password) VALUES (?, ?)',
         [username, hashedPassword],
         (dbErr, dbResult) => {
@@ -101,12 +107,44 @@ app.get('/isLoggedIn', (req, res) => {
   }
 });
 
+app.post('/login', async (req, res) => {
+  try {
+    const enteredUsername = req.body.username;
+    const enteredPassword = req.body.password;
+    const [dbResult] = await db.query(
+      'SELECT username, password FROM studentbee.tbl_user_login_information where username = ?',
+      [enteredUsername]
+    );
+    if (dbResult.length < 1) {
+      return res.send({ status: 'invalidCredentials' });
+    }
+    const actualHashedPassword = dbResult[0].password;
+    const isCorrectPassword = await bcrypt.compare(
+      enteredPassword,
+      actualHashedPassword
+    );
+    if (!isCorrectPassword) {
+      return res.send({ status: 'invalidCredentials' });
+    }
+    req.session.user = {
+      username: enteredUsername,
+      password: actualHashedPassword,
+    };
+    return res.send({
+      status: 'validCredentials',
+    });
+  } catch (err) {
+    console.log(err);
+    return res.send({ error: true });
+  }
+});
+
 //POST request logic to handle the login of a user
-app.post('/login', (req, res) => {
+app.post('/OldLogin', (req, res) => {
   const enteredUsername = req.body.username;
   const enteredPassword = req.body.password;
   //Get the hashed password of a user with that username
-  db.query(
+  oldDBConnection.query(
     'SELECT user_id, username, password FROM studentbee.tbl_user_login_information where username = ?',
     [enteredUsername],
     (dbErr, dbResult) => {
