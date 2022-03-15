@@ -27,7 +27,7 @@ router.use(cookieParser());
 router.use(
   session({
     key: '',
-    secret: bcrypt.genSalt(SALTROUNDS),
+    secret: bcrypt.genSaltSync(SALTROUNDS),
     resave: false,
     saveUninitialized: false,
     cookie: { maxAge: 24 * 60 * 60 * 1000 },
@@ -45,6 +45,7 @@ const dbConfig = {
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
+  multipleStatements: true,
 };
 const db = mysql2.createPool(dbConfig);
 
@@ -63,19 +64,19 @@ router.route('/register').post(async (req, res) => {
     const enteredPassword = req.body.password;
     //Check is a user already exists with that username
     const [dbResult] = await db.query(
-      'SELECT username FROM tbl_user_login_information WHERE username = ?',
+      'CALL rt_check_if_username_exists(?, @doesUsernameExist); SELECT @doesUsernameExist;',
       [enteredUsername]
     );
-    if (dbResult.length > 0) {
+    if (Boolean(dbResult[1][0]['@doesUsernameExist'])) {
       return res.send({ status: 'usernameIsTaken' });
     }
     //Create the salt to use and then hash the enteredPassword to be
     const saltToUse = await bcrypt.genSalt(SALTROUNDS);
     const hashedPassword = await bcrypt.hash(enteredPassword, saltToUse);
-    await db.query(
-      'INSERT INTO tbl_user_login_information (username, password) VALUES (?, ?)',
-      [enteredUsername, hashedPassword]
-    );
+    await db.query('CALL rt_add_new_record_tbl_user_login_information(?,?)', [
+      enteredUsername,
+      hashedPassword,
+    ]);
     return res.send({ status: 'success' });
   } catch (err) {
     console.log(err);

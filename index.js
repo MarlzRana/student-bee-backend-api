@@ -35,7 +35,7 @@ app.use(cookieParser());
 app.use(
   session({
     key: '',
-    secret: bcrypt.genSalt(SALTROUNDS),
+    secret: bcrypt.genSaltSync(SALTROUNDS),
     resave: false,
     saveUninitialized: false,
     cookie: { maxAge: 24 * 60 * 60 * 1000 },
@@ -59,6 +59,7 @@ const dbConfig = {
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
+  multipleStatements: true,
 };
 const db = mysql2.createPool(dbConfig);
 
