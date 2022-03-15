@@ -11,7 +11,7 @@ const session = require('express-session');
 require('dotenv').config();
 
 //Environmental variables
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 3001;
 const DBHOSTSERVERADDRESS = process.env.DBHOSTSERVERADDRESS;
 const DBSERVERUSERNAME = process.env.DBSERVERUSERNAME;
 const DBSERVERPASSWORD = process.env.DBSERVERPASSWORD;
