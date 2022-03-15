@@ -3,12 +3,14 @@
 const express = require('express');
 const mysql2 = require('mysql2/promise');
 const fs = require('fs');
-const cors = require('cors');
 const bcrypt = require('bcrypt');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const session = require('express-session');
 require('dotenv').config();
+
+//Importing local file dependencies
+const tbl_user_login_information = require('../database/tbl_user_login_information');
 
 //Environmental variables
 const DBHOSTSERVERADDRESS = process.env.DBHOSTSERVERADDRESS;
@@ -63,20 +65,19 @@ router.route('/register').post(async (req, res) => {
     const enteredUsername = req.body.username;
     const enteredPassword = req.body.password;
     //Check is a user already exists with that username
-    const [dbResult] = await db.query(
-      'CALL rt_check_if_username_exists(?, @doesUsernameExist); SELECT @doesUsernameExist;',
-      [enteredUsername]
-    );
-    if (Boolean(dbResult[1][0]['@doesUsernameExist'])) {
+    const doesUsernameExist =
+      await tbl_user_login_information.doesUsernameExist(enteredUsername);
+    if (doesUsernameExist) {
       return res.send({ status: 'usernameIsTaken' });
     }
     //Create the salt to use and then hash the enteredPassword to be
     const saltToUse = await bcrypt.genSalt(SALTROUNDS);
     const hashedPassword = await bcrypt.hash(enteredPassword, saltToUse);
-    await db.query('CALL rt_add_new_record_tbl_user_login_information(?,?)', [
+    //Then add the user to the database
+    await tbl_user_login_information.addNewRecord(
       enteredUsername,
-      hashedPassword,
-    ]);
+      hashedPassword
+    );
     return res.send({ status: 'success' });
   } catch (err) {
     console.log(err);
@@ -89,21 +90,25 @@ router.route('/login').post(async (req, res) => {
   try {
     const enteredUsername = req.body.username;
     const enteredPassword = req.body.password;
-    const [dbResult] = await db.query(
-      'CALL rt_select_record_tbl_user_login_information_by_username(?)',
-      [enteredUsername]
-    );
-    if (dbResult[0].length < 1) {
+    //Check if the user exists and grab their credentials
+    const dbResult =
+      await tbl_user_login_information.selectSingleRecordByUsername(
+        enteredUsername
+      );
+    if (dbResult == false) {
       return res.send({ status: 'invalidCredentials' });
     }
-    const actualHashedPassword = dbResult[0][0].password;
+    //Check if the entered password matches the hashed password in the database
+    const actualHashedPassword = dbResult.password;
     const isCorrectPassword = await bcrypt.compare(
       enteredPassword,
       actualHashedPassword
     );
+    //If the password is incorrect, return an a message letting the API user know that the login was unsuccessful
     if (!isCorrectPassword) {
       return res.send({ status: 'invalidCredentials' });
     }
+    //If the password is correct, create a session and return a cookie and a message letting the API user know that the login was successful
     req.session.user = {
       username: enteredUsername,
       password: actualHashedPassword,
