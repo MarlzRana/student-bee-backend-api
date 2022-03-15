@@ -27,7 +27,7 @@ router.use(cookieParser());
 router.use(
   session({
     key: '',
-    secret: 'testSecret',
+    secret: bcrypt.genSalt(SALTROUNDS),
     resave: false,
     saveUninitialized: false,
     cookie: { maxAge: 24 * 60 * 60 * 1000 },
