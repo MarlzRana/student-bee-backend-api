@@ -90,13 +90,13 @@ router.route('/login').post(async (req, res) => {
     const enteredUsername = req.body.username;
     const enteredPassword = req.body.password;
     const [dbResult] = await db.query(
-      'SELECT username, password FROM tbl_user_login_information where username = ?',
+      'CALL rt_select_record_tbl_user_login_information_by_username(?)',
       [enteredUsername]
     );
-    if (dbResult.length < 1) {
+    if (dbResult[0].length < 1) {
       return res.send({ status: 'invalidCredentials' });
     }
-    const actualHashedPassword = dbResult[0].password;
+    const actualHashedPassword = dbResult[0][0].password;
     const isCorrectPassword = await bcrypt.compare(
       enteredPassword,
       actualHashedPassword
