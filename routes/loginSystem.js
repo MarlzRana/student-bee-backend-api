@@ -9,6 +9,7 @@ require('dotenv').config();
 
 //Importing local file dependencies
 const tbl_user_login_information = require('../database/tbl_user_login_information');
+const tbl_personal_login_information = require('../database/tbl_user_personal_information');
 const validation = require('../validation/validation');
 //Environmental variables
 const SALTROUNDS = parseInt(process.env.SALTROUNDS);
@@ -30,7 +31,7 @@ router.use(
 
 //A default gateway to test if API server is accessible
 router.route('/').get((req, res) => {
-  res.send({
+  return res.send({
     message: 'Default gateway of student-bee-backend-api route:/loginSystem',
   });
 });
@@ -38,14 +39,22 @@ router.route('/').get((req, res) => {
 //POST request logic to handle the registration of a user
 router.route('/register').post(async (req, res) => {
   try {
-    //Get the entered username and password
+    //Get the entered username and password and their personal information
     const enteredUsername = req.body.username;
     const enteredPassword = req.body.password;
+    const enteredFirstName = req.body.firstName;
+    const enteredLastName = req.body.lastName;
+    const enteredEmail = req.body.email;
+    const enteredDOB = req.body.dob;
     //Checking if the format of the username and password is correct
     if (
       !(
         validation.validateUsername(enteredUsername) &&
-        validation.validatePassword(enteredPassword)
+        validation.validatePassword(enteredPassword) &&
+        validation.validateName(enteredFirstName) &&
+        validation.validateName(enteredLastName) &&
+        validation.validateEmail(enteredEmail) &&
+        validation.validateDOB(enteredDOB)
       )
     ) {
       return res.send({
@@ -63,9 +72,16 @@ router.route('/register').post(async (req, res) => {
     const saltToUse = await bcrypt.genSalt(SALTROUNDS);
     const hashedPassword = await bcrypt.hash(enteredPassword, saltToUse);
     //Then add the user to the database
-    await tbl_user_login_information.addNewRecord(
+    const userIDUsed = await tbl_user_login_information.addNewRecord(
       enteredUsername,
       hashedPassword
+    );
+    const personalIDUsed = await tbl_personal_login_information.addNewRecord(
+      userIDUsed,
+      enteredFirstName,
+      enteredLastName,
+      enteredEmail,
+      enteredDOB
     );
     return res.send({ status: 'success' });
   } catch (err) {

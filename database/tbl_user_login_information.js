@@ -26,11 +26,11 @@ const db = mysql2.createPool(dbConfig);
 async function addNewRecord(usernameIn, passwordIn) {
   return new Promise(async (resolve, reject) => {
     try {
-      await db.query('CALL rt_add_new_record_tbl_user_login_information(?,?)', [
-        usernameIn,
-        passwordIn,
-      ]);
-      return resolve(true);
+      const [dbResult] = await db.query(
+        'CALL rt_add_new_record_tbl_user_login_information(?,?, @user_id_used); SELECT @user_id_used',
+        [usernameIn, passwordIn]
+      );
+      return resolve(dbResult[1][0]['@user_id_used']);
     } catch (err) {
       resolve(false);
       throw '\nThere was an error when adding a new record to tbl_user_login_information';

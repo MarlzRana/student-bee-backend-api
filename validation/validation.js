@@ -28,8 +28,31 @@ function validatePassword() {
   return true;
 }
 
+function validateEmail() {
+  const emailRegex =
+    /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
+  for (let i = 0; i < arguments.length; i++) {
+    if (!emailRegex.test(arguments[i])) {
+      return false;
+    }
+  }
+  return true;
+}
+
+function validateDOB() {
+  const dobRegex = /^\d{4}-\d{2}-\d{2}$/;
+  for (let i = 0; i < arguments.length; i++) {
+    if (!dobRegex.test(arguments[i])) {
+      return false;
+    }
+  }
+  return true;
+}
+
 module.exports = {
   validateName: validateName,
   validateUsername: validateUsername,
   validatePassword: validatePassword,
+  validateEmail: validateEmail,
+  validateDOB: validateDOB,
 };
