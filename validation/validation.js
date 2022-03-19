@@ -1,5 +1,5 @@
 function validateName() {
-  const nameRegex = /^[a-zA-Z]{2,20}$/;
+  const nameRegex = /^([a-zA-Z]|-){2,20}$/;
   for (let i = 0; i < arguments.length; i++) {
     if (!nameRegex.test(arguments[i])) {
       return false;
@@ -9,7 +9,7 @@ function validateName() {
 }
 
 function validateUsername() {
-  const usernameRegex = /^[a-zA-Z0-9]{2,25}$/;
+  const usernameRegex = /^[a-zA-Z0-9]{4,25}$/;
   for (let i = 0; i < arguments.length; i++) {
     if (!usernameRegex.test(arguments[i])) {
       return false;

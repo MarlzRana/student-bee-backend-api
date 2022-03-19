@@ -19,15 +19,6 @@ const router = express.Router();
 router.use(express.json());
 router.use(express.urlencoded({ extended: true }));
 router.use(cookieParser());
-router.use(
-  session({
-    key: '',
-    secret: bcrypt.genSaltSync(SALTROUNDS),
-    resave: false,
-    saveUninitialized: false,
-    cookie: { maxAge: 24 * 60 * 60 * 1000 },
-  })
-);
 
 //A default gateway to test if API server is accessible
 router.route('/').get((req, res) => {
@@ -46,20 +37,29 @@ router.route('/register').post(async (req, res) => {
     const enteredLastName = req.body.lastName;
     const enteredEmail = req.body.email;
     const enteredDOB = req.body.dob;
-    //Checking if the format of the username and password is correct
+    //Checking if the format of the username and password and their personal information is correct
+    const validationCheckDetails = {
+      username: validation.validateUsername(enteredUsername),
+      password: validation.validatePassword(enteredPassword),
+      firstName: validation.validateName(enteredFirstName),
+      lastName: validation.validateName(enteredLastName),
+      email: validation.validateEmail(enteredEmail),
+      dob: validation.validateDOB(enteredDOB),
+    };
     if (
       !(
-        validation.validateUsername(enteredUsername) &&
-        validation.validatePassword(enteredPassword) &&
-        validation.validateName(enteredFirstName) &&
-        validation.validateName(enteredLastName) &&
-        validation.validateEmail(enteredEmail) &&
-        validation.validateDOB(enteredDOB)
+        validationCheckDetails.username &&
+        validationCheckDetails.password &&
+        validationCheckDetails.firstName &&
+        validationCheckDetails.lastName &&
+        validationCheckDetails.email &&
+        validationCheckDetails.dob
       )
     ) {
       return res.send({
         status: 'failure',
         reason: 'invalidInputFormat',
+        validationCheckDetails: validationCheckDetails,
       });
     }
     //Check is a user already exists with that username
@@ -97,15 +97,15 @@ router.route('/login').post(async (req, res) => {
     const enteredUsername = req.body.username;
     const enteredPassword = req.body.password;
     //Checking if the format of the username and password is correct (helps prevent SQL injection)
-    if (
-      !(
-        validation.validateUsername(enteredUsername) &&
-        validation.validatePassword(enteredPassword)
-      )
-    ) {
+    const validationCheckDetails = {
+      username: validation.validateUsername(enteredUsername),
+      password: validation.validatePassword(enteredPassword),
+    };
+    if (!(validationCheckDetails.username && validationCheckDetails.password)) {
       return res.send({
         status: 'failure',
         reason: 'invalidInputFormat',
+        validationCheckDetails: validationCheckDetails,
       });
     }
     //Check if the user exists and grab their credentials
@@ -124,7 +124,7 @@ router.route('/login').post(async (req, res) => {
     );
     //If the password is incorrect, return an a message letting the API user know that the login was unsuccessful
     if (!isCorrectPassword) {
-      return res.send({ status: 'failure', status: 'invalidCredentials' });
+      return res.send({ status: 'failure', reason: 'invalidCredentials' });
     }
     //If the password is correct, create a session and return a cookie and a message letting the API user know that the login was successful
     req.session.user = {
@@ -144,10 +144,20 @@ router.route('/login').post(async (req, res) => {
 //GET request that reads and compares the cookie sent to active cookies on the server to check is a user is logged in
 router.route('/isLoggedIn').get((req, res) => {
   if (req.session.user) {
-    res.send({ status: 'success', isLoggedIn: true, user: req.session.user });
+    res.send({
+      status: 'success',
+      isLoggedIn: true,
+      username: req.session.user.username,
+    });
   } else {
     res.send({ status: 'failure', isLoggedIn: false });
   }
+});
+
+//GET request that logs the user out and destroys the cookie
+router.route('/logout').get((req, res) => {
+  req.session.destroy();
+  return res.send({ status: 'success' });
 });
 
 module.exports = router;

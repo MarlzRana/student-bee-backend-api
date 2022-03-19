@@ -44,9 +44,11 @@ app.use(
 
 //Importing our routes
 const loginSystem = require('./routes/loginSystem');
+const eventsSystem = require('./routes/eventsSystem');
 
 //Configuring our routes as "middleware"
 app.use('/loginSystem', loginSystem);
+app.use('/eventsSystem', eventsSystem);
 
 //Setting up the database connection
 const dbConfig = {
