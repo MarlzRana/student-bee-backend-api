@@ -122,12 +122,11 @@ router.route('/login').post(async (req, res) => {
       enteredPassword,
       actualHashedPassword
     );
-    //If the password is incorrect, return an a message letting the API user know that the login was unsuccessful
-    if (!isCorrectPassword) {
-      return res.send({ status: 'failure', reason: 'invalidCredentials' });
-    }
+    //Get the userID of the particular user from the database
+    const userID = dbResult['user_id'];
     //If the password is correct, create a session and return a cookie and a message letting the API user know that the login was successful
     req.session.user = {
+      userID: userID,
       username: enteredUsername,
       password: actualHashedPassword,
     };
@@ -143,14 +142,19 @@ router.route('/login').post(async (req, res) => {
 
 //GET request that reads and compares the cookie sent to active cookies on the server to check is a user is logged in
 router.route('/isLoggedIn').get((req, res) => {
-  if (req.session.user) {
-    res.send({
-      status: 'success',
-      isLoggedIn: true,
-      username: req.session.user.username,
-    });
-  } else {
-    res.send({ status: 'failure', isLoggedIn: false });
+  try {
+    if (req.session.user) {
+      res.send({
+        status: 'success',
+        isLoggedIn: true,
+        username: req.session.user.username,
+      });
+    } else {
+      res.send({ status: 'failure', isLoggedIn: false });
+    }
+  } catch (err) {
+    console.log(err);
+    return res.send({ error: true });
   }
 });
 

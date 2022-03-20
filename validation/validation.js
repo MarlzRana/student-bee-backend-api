@@ -1,10 +1,44 @@
 function validateName() {
-  const nameRegex = /^([a-zA-Z]|-){2,20}$/;
+  const nameRegex = /^([a-zA-Z]|-){2,25}$/;
   for (let i = 0; i < arguments.length; i++) {
     if (!nameRegex.test(arguments[i])) {
       return false;
     }
   }
+  return true;
+}
+
+function validateMediumName() {
+  const nameRegex = /([a-zA-Z]|-){2,51}/;
+  for (let i = 0; i < arguments.length; i++) {
+    if (!nameRegex.test(arguments[i])) {
+      return false;
+    }
+  }
+  return true;
+}
+
+function validateLongName() {
+  const nameRegex = /([a-zA-Z]|-){2,60}/;
+  for (let i = 0; i < arguments.length; i++) {
+    if (!nameRegex.test(arguments[i])) {
+      return false;
+    }
+  }
+  return true;
+}
+
+function validateDate() {
+  const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+  for (let i = 0; i < arguments.length; i++) {
+    if (!dateRegex.test(arguments[i])) {
+      return false;
+    }
+  }
+  return true;
+}
+
+function validateDateTime() {
   return true;
 }
 
@@ -39,6 +73,16 @@ function validateEmail() {
   return true;
 }
 
+function validateInternationalPhoneNumber() {
+  const phoneRegex = /^\+?[0-9]{10,15}$/;
+  for (let i = 0; i < arguments.length; i++) {
+    if (!phoneRegex.test(arguments[i])) {
+      return false;
+    }
+  }
+  return true;
+}
+
 function validateDOB() {
   const dobRegex = /^\d{4}-\d{2}-\d{2}$/;
   for (let i = 0; i < arguments.length; i++) {
@@ -49,10 +93,26 @@ function validateDOB() {
   return true;
 }
 
+function validateLongDescription() {
+  const descriptionRegex = /^\w{0,3500}$/;
+  for (let i = 0; i < arguments.length; i++) {
+    if (!descriptionRegex.test(arguments[i])) {
+      return false;
+    }
+  }
+  return true;
+}
+
 module.exports = {
   validateName: validateName,
+  validateMediumName: validateMediumName,
+  validateLongName: validateLongName,
   validateUsername: validateUsername,
+  validateDate: validateDate,
+  validateDateTime: validateDateTime,
   validatePassword: validatePassword,
   validateEmail: validateEmail,
+  validateInternationalPhoneNumber: validateInternationalPhoneNumber,
   validateDOB: validateDOB,
+  validateLongDescription: validateLongDescription,
 };
