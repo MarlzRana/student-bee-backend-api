@@ -6,6 +6,7 @@ require('dotenv').config();
 //Importing local file dependencies
 const validation = require('../validation/validation');
 const tbl_events = require('../database/tbl_events');
+const tbl_user_login_information = require('../database/tbl_user_login_information');
 //Environmental variables
 
 //Package setup
@@ -41,14 +42,14 @@ router.route('/addEvent').post(async (req, res) => {
     const descriptionIn = req.body.description;
     //Check that all the parameters are not null
     if (
-      titleIn !== null &&
-      startDateTimeIn !== null &&
-      endDateTimeIn !== null &&
-      locationIn !== null &&
-      organizerNameIn !== null &&
-      contactEmailIn !== null &&
-      contactPhoneNumberIn !== null &&
-      descriptionIn !== null
+      titleIn === null ||
+      startDateTimeIn === null ||
+      endDateTimeIn === null ||
+      locationIn === null ||
+      organizerNameIn === null ||
+      contactEmailIn === null ||
+      contactPhoneNumberIn === null ||
+      descriptionIn === null
     ) {
       return res.send({
         status: 'failure',
@@ -75,7 +76,7 @@ router.route('/addEvent').post(async (req, res) => {
       contactEmailIn: validation.validateEmail(contactEmailIn),
       contactPhoneNumberIn:
         validation.validateInternationalPhoneNumber(contactPhoneNumberIn),
-      descriptionIn: validation.validateLongDescription(descriptionIn),
+      descriptionIn: validation.validateShortDescription(descriptionIn),
     };
     if (
       !(
@@ -118,6 +119,28 @@ router.route('/addEvent').post(async (req, res) => {
       reason: 'internalError',
     });
   }
+});
+
+router.route('/top10MostRecentEvents').get(async (req, res) => {
+  const dbResult = await tbl_events.getTop10MostRecentEvents();
+  const arrOfObjToSend = dbResult.map((row) => {
+    const usernameForParticularUserID =
+      tbl_user_login_information.getUsernameForUserID(row['user_id']);
+    return {
+      eventID: row.eventID,
+      username: usernameForParticularUserID,
+      title: row.title,
+      organizerName: row['organizer_name'],
+      startDateTime: row['start_date_time'],
+      endDateTime: row['end_date_time'],
+      location: row.location,
+      contactEmail: row['contact_email'],
+      contactPhoneNumber: row['contact_phone_number'],
+      description: row.description,
+    };
+  });
+
+  return res.send(arrOfObjToSend);
 });
 
 router.route('/getEventByEventName').get(async (req, res) => {});

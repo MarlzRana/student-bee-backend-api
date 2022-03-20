@@ -72,8 +72,26 @@ async function doesUsernameExist(usernameIn) {
   });
 }
 
+async function getUsernameByUserID(userIDIn) {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const [dbResult] = await db.query(
+        'CALL rt_get_username_by_user_id_tbl_user_login_information(?)',
+        [userIDIn]
+      );
+      if (dbResult[0].length < 1) {
+        return resolve(false);
+      }
+      return resolve(dbResult[0][0]);
+    } catch (err) {
+      resolve(false);
+      throw '\nThere was an error when getting the username from tbl_user_login_information';
+    }
+  });
+}
 module.exports = {
   addNewRecord: addNewRecord,
   doesUsernameExist: doesUsernameExist,
   selectSingleRecordByUsername: selectSingleRecordByUsername,
+  getUsernameByUserID: getUsernameByUserID,
 };

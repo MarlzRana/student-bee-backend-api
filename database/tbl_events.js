@@ -58,6 +58,21 @@ async function addNewRecord(
   });
 }
 
+async function getTop10MostRecentEvents() {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const [dbResult] = await db.query(
+        'CALL rt_get_top_10_most_recent_events_tbl_events();'
+      );
+      return resolve(dbResult[0]);
+    } catch (err) {
+      console.log(err);
+      resolve(false);
+      throw '\nThere was an error when adding a new record to tbl_events\n';
+    }
+  });
+}
 module.exports = {
   addNewRecord: addNewRecord,
+  getTop10MostRecentEvents: getTop10MostRecentEvents,
 };

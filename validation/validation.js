@@ -93,8 +93,8 @@ function validateDOB() {
   return true;
 }
 
-function validateLongDescription() {
-  const descriptionRegex = /^\w{0,3500}$/;
+function validateShortDescription() {
+  const descriptionRegex = /^\w{0,300}$/;
   for (let i = 0; i < arguments.length; i++) {
     if (!descriptionRegex.test(arguments[i])) {
       return false;
@@ -114,5 +114,5 @@ module.exports = {
   validateEmail: validateEmail,
   validateInternationalPhoneNumber: validateInternationalPhoneNumber,
   validateDOB: validateDOB,
-  validateLongDescription: validateLongDescription,
+  validateShortDescription: validateShortDescription,
 };
