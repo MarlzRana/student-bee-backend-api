@@ -82,7 +82,7 @@ async function getUsernameByUserID(userIDIn) {
       if (dbResult[0].length < 1) {
         return resolve(false);
       }
-      return resolve(dbResult[0][0]);
+      return resolve(dbResult[0][0].username);
     } catch (err) {
       resolve(false);
       throw '\nThere was an error when getting the username from tbl_user_login_information';

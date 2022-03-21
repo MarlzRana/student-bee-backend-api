@@ -122,25 +122,36 @@ router.route('/addEvent').post(async (req, res) => {
 });
 
 router.route('/top10MostRecentEvents').get(async (req, res) => {
-  const dbResult = await tbl_events.getTop10MostRecentEvents();
-  const arrOfObjToSend = dbResult.map((row) => {
-    const usernameForParticularUserID =
-      tbl_user_login_information.getUsernameForUserID(row['user_id']);
-    return {
-      eventID: row.eventID,
-      username: usernameForParticularUserID,
-      title: row.title,
-      organizerName: row['organizer_name'],
-      startDateTime: row['start_date_time'],
-      endDateTime: row['end_date_time'],
-      location: row.location,
-      contactEmail: row['contact_email'],
-      contactPhoneNumber: row['contact_phone_number'],
-      description: row.description,
-    };
-  });
+  try {
+    const dbResult = await tbl_events.getTop10MostRecentEvents();
+    // console.log(dbResult);
 
-  return res.send(arrOfObjToSend);
+    const arrOfObjToSend = await Promise.all(
+      dbResult.map(async (row) => {
+        const usernameForParticularUserID =
+          await tbl_user_login_information.getUsernameByUserID(row['user_id']);
+        return {
+          eventID: row['event_id'],
+          username: usernameForParticularUserID,
+          title: row['title'],
+          startDateTime: row['start_datetime'],
+          endDateTime: row['end_datetime'],
+          location: row['location'],
+          organizerName: row['organizer_name'],
+          contactEmail: row['contact_email'],
+          contactPhoneNumber: row['contact_phone_number'],
+          description: row['description'],
+        };
+      })
+    );
+    return res.send(arrOfObjToSend);
+  } catch (err) {
+    console.log(err);
+    return res.send({
+      status: 'failure',
+      reason: 'internalError',
+    });
+  }
 });
 
 router.route('/getEventByEventName').get(async (req, res) => {});
