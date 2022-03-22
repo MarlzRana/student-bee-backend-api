@@ -103,6 +103,26 @@ function validateShortDescription() {
   return true;
 }
 
+function validateBio() {
+  const descriptionRegex = /^\w{0,150}$/;
+  for (let i = 0; i < arguments.length; i++) {
+    if (!descriptionRegex.test(arguments[i])) {
+      return false;
+    }
+  }
+  return true;
+}
+
+function validateStudentYear() {
+  const descriptionRegex = /^\d$/;
+  for (let i = 0; i < arguments.length; i++) {
+    if (!descriptionRegex.test(arguments[i])) {
+      return false;
+    }
+  }
+  return true;
+}
+
 module.exports = {
   validateName: validateName,
   validateMediumName: validateMediumName,
@@ -115,6 +135,8 @@ module.exports = {
   validateInternationalPhoneNumber: validateInternationalPhoneNumber,
   validateDOB: validateDOB,
   validateShortDescription: validateShortDescription,
+  validateBio: validateBio,
+  validateStudentYear: validateStudentYear,
 };
 
 // /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;

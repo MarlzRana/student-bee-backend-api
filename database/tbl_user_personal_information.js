@@ -1,5 +1,5 @@
-const mysql2 = require('mysql2/promise');
-const fs = require('fs');
+const mysql2 = require("mysql2/promise");
+const fs = require("fs");
 
 //Environmental variables
 const DBHOSTSERVERADDRESS = process.env.DBHOSTSERVERADDRESS;
@@ -27,18 +27,35 @@ async function addNewRecord(userIDIn, firstName, lastName, email, dob) {
   return new Promise(async (resolve, reject) => {
     try {
       const [dbResult] = await db.query(
-        'CALL rt_add_new_record_tbl_user_personal_information(?,?,?,?,?, @personal_id_used); SELECT @personal_id_used',
+        "CALL rt_add_new_record_tbl_user_personal_information(?,?,?,?,?, @personal_id_used); SELECT @personal_id_used",
         [userIDIn, firstName, lastName, email, dob]
       );
-      return resolve(dbResult[1][0]['@personal_id_used']);
+      return resolve(dbResult[1][0]["@personal_id_used"]);
     } catch (err) {
       resolve(false);
       console.log(err);
-      throw '\nThere was an error when adding a new record to tbl_personal_login_information';
+      throw "\nThere was an error when adding a new record to tbl_personal_login_information";
+    }
+  });
+}
+
+async function editRecord(userIDIn, usernameIn, passwordIn) {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const [dbResult] = await db.query(
+        "CALL rt_edit_record_tbl_user_login_information(?,?,?)",
+        [userIDIn, usernameIn, passwordIn]
+      );
+      console.log(dbResult);
+      return resolve(true);
+    } catch (err) {
+      resolve(false);
+      throw "\nThere was an error when editing a record from tbl_user_login_information";
     }
   });
 }
 
 module.exports = {
   addNewRecord: addNewRecord,
+  editRecord: editRecord,
 };
