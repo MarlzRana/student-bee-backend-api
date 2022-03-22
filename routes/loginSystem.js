@@ -11,6 +11,7 @@ require("dotenv").config();
 const tbl_user_login_information = require("../database/tbl_user_login_information");
 const tbl_personal_login_information = require("../database/tbl_user_personal_information");
 const validation = require("../validation/validation");
+const tbl_user_personal_information = require("../database/tbl_user_personal_information");
 //Environmental variables
 const SALTROUNDS = parseInt(process.env.SALTROUNDS);
 
@@ -165,11 +166,10 @@ router.route("/logout").get((req, res) => {
 });
 
 //POST request that allows the user to edit their profile
-router.route("/editProfile").post((req, res) => {
-  console.log("Hello there, ahh general kenobi");
+router.route("/editProfile").post(async (req, res) => {
   try {
     const userID = req.session.user.userID;
-    const currentUserName = req.session.username;
+    const currentHashedPassword = req.session.user.password;
 
     const enteredFirstName = req.body.firstName;
     const enteredLastName = req.body.lastName;
@@ -212,7 +212,7 @@ router.route("/editProfile").post((req, res) => {
     ) {
       return res.send({
         status: "failure",
-        reason: "invalidInputFormat",
+        reason: "Invalid Input Format",
         validationCheckDetails: validationCheckDetails,
       });
     }
@@ -234,27 +234,52 @@ router.route("/editProfile").post((req, res) => {
     }
 
     //Check if the entered password matches the hashed password in the database
-    const currentUserRecord =
-      await tbl_user_login_information.selectSingleRecordByUsername(
-        currentUserName
-      );
-    const actualHashedPassword = currentUserRecord.password;
     const isCorrectPassword = await bcrypt.compare(
       enteredPassword,
-      actualHashedPassword
+      currentHashedPassword
     );
 
     if (!isCorrectPassword) {
       return res.send({
-        status: "Failure",
-        reason: "currentPasswordIncorrect",
+        status: "failure",
+        reason: "Password Incorrect",
       });
     }
 
+    //Hash new password for storage
+    const saltToUse = await bcrypt.genSalt(SALTROUNDS);
+    const hashedPassword = await bcrypt.hash(enteredNewPassword, saltToUse);
+
+    //Update login information
+    const updatedLoginInfo = await tbl_user_login_information.editRecord(
+      userID,
+      enteredUsername,
+      hashedPassword
+    );
+
+    //Update personal information
+    const updatePersonalInfo = await tbl_user_personal_information.editRecord(
+      userID,
+      enteredFirstName,
+      enteredLastName,
+      enteredEmailAddress,
+      enteredDob,
+      enteredBio,
+      enteredStudentYear,
+      enteredCourse
+    );
+
+    req.session.user = {
+      userID: userID,
+      username: enteredUsername,
+      password: hashedPassword,
+    };
+
     return res.send({ status: "success" });
   } catch (error) {
+    console.log("");
     console.log(error);
-    return res.send({ error: "true" });
+    return res.send({ error: true });
   }
 });
 

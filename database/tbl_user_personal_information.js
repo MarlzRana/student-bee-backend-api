@@ -39,18 +39,36 @@ async function addNewRecord(userIDIn, firstName, lastName, email, dob) {
   });
 }
 
-async function editRecord(userIDIn, usernameIn, passwordIn) {
+async function editRecord(
+  userIDIn,
+  firstNameIn,
+  lastNameIn,
+  emailAddressIn,
+  dobIn,
+  bioIn,
+  studentYearIn,
+  courseNameIn
+) {
   return new Promise(async (resolve, reject) => {
     try {
       const [dbResult] = await db.query(
-        "CALL rt_edit_record_tbl_user_login_information(?,?,?)",
-        [userIDIn, usernameIn, passwordIn]
+        "CALL rt_edit_record_tbl_user_personal_information(?,?,?,?,?,?,?,?)",
+        [
+          userIDIn,
+          firstNameIn,
+          lastNameIn,
+          emailAddressIn,
+          dobIn,
+          bioIn,
+          studentYearIn,
+          courseNameIn,
+        ]
       );
       console.log(dbResult);
       return resolve(true);
     } catch (err) {
       resolve(false);
-      throw "\nThere was an error when editing a record from tbl_user_login_information";
+      throw "\nThere was an error when editing a record from tbl_user_personal_information";
     }
   });
 }

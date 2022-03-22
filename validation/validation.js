@@ -104,7 +104,7 @@ function validateShortDescription() {
 }
 
 function validateBio() {
-  const descriptionRegex = /^\w{0,150}$/;
+  const descriptionRegex = /^(\w|\s){0,150}$/;
   for (let i = 0; i < arguments.length; i++) {
     if (!descriptionRegex.test(arguments[i])) {
       return false;
@@ -114,7 +114,7 @@ function validateBio() {
 }
 
 function validateStudentYear() {
-  const descriptionRegex = /^\d$/;
+  const descriptionRegex = /^\w{1,10}$/;
   for (let i = 0; i < arguments.length; i++) {
     if (!descriptionRegex.test(arguments[i])) {
       return false;
