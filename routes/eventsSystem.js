@@ -144,7 +144,7 @@ router.route('/top10MostRecentEvents').get(async (req, res) => {
         };
       })
     );
-    return res.send(arrOfObjToSend);
+    return res.send({ events: arrOfObjToSend });
   } catch (err) {
     console.log(err);
     return res.send({
