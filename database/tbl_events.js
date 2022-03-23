@@ -1,5 +1,5 @@
-const mysql2 = require("mysql2/promise");
-const fs = require("fs");
+const mysql2 = require('mysql2/promise');
+const fs = require('fs');
 
 //Environmental variables
 const DBHOSTSERVERADDRESS = process.env.DBHOSTSERVERADDRESS;
@@ -23,57 +23,56 @@ const dbConfig = {
 };
 const db = mysql2.createPool(dbConfig);
 
-async function addNewRecord(userIDIn, firstName, lastName, email, dob) {
-  return new Promise(async (resolve, reject) => {
-    try {
-      const [dbResult] = await db.query(
-        "CALL rt_add_new_record_tbl_user_personal_information(?,?,?,?,?, @personal_id_used); SELECT @personal_id_used",
-        [userIDIn, firstName, lastName, email, dob]
-      );
-      return resolve(dbResult[1][0]["@personal_id_used"]);
-    } catch (err) {
-      resolve(false);
-      console.log(err);
-      throw "\nThere was an error when adding a new record to tbl_personal_login_information";
-    }
-  });
-}
-
-async function editRecord(
+async function addNewRecord(
   userIDIn,
-  firstNameIn,
-  lastNameIn,
-  emailAddressIn,
-  dobIn,
-  bioIn,
-  studentYearIn,
-  courseNameIn
+  titleIn,
+  startDateTimeIn,
+  endDateTimeIn,
+  locationIn,
+  organizerNameIn,
+  contactEmailIn,
+  contactPhoneNumberIn,
+  descriptionIn
 ) {
   return new Promise(async (resolve, reject) => {
     try {
       const [dbResult] = await db.query(
-        "CALL rt_edit_record_tbl_user_personal_information(?,?,?,?,?,?,?,?)",
+        'CALL rt_add_new_record_tbl_events(?,?,?,?,?,?,?,?,?, @events_id_used_out); SELECT @events_id_used_out;',
         [
           userIDIn,
-          firstNameIn,
-          lastNameIn,
-          emailAddressIn,
-          dobIn,
-          bioIn,
-          studentYearIn,
-          courseNameIn,
+          titleIn,
+          startDateTimeIn,
+          endDateTimeIn,
+          locationIn,
+          organizerNameIn,
+          contactEmailIn,
+          contactPhoneNumberIn,
+          descriptionIn,
         ]
       );
-      console.log(dbResult);
-      return resolve(true);
+      return resolve(dbResult[1][0]['@events_id_used_out']);
     } catch (err) {
       resolve(false);
-      throw "\nThere was an error when editing a record from tbl_user_personal_information";
+      throw '\nThere was an error when adding a new record to tbl_events\n';
     }
   });
 }
 
+async function getTop10MostRecentEvents() {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const [dbResult] = await db.query(
+        'CALL rt_get_top_10_most_recent_events_tbl_events();'
+      );
+      return resolve(dbResult[0]);
+    } catch (err) {
+      console.log(err);
+      resolve(false);
+      throw '\nThere was an error when adding a new record to tbl_events\n';
+    }
+  });
+}
 module.exports = {
   addNewRecord: addNewRecord,
-  editRecord: editRecord,
+  getTop10MostRecentEvents: getTop10MostRecentEvents,
 };
