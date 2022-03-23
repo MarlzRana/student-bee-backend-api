@@ -21,7 +21,7 @@ router.route('/').get((req, res) => {
   });
 });
 
-route.route('/addSociety').post(async (req, res) => {
+router.route('/add').post(async (req, res) => {
   try {
     //Check if the user is logged in
     if (!req.session.user) {
@@ -31,31 +31,63 @@ route.route('/addSociety').post(async (req, res) => {
       });
     }
     //Get the parameters provided in the response
-    const societyNameIn = req.body.societyName;
+    const societyNameIn = req.body.societyNameIn;
     const societyLeaderUsernameIn = req.session.user.userID;
-    const societyLeaderNameIn = req.body.societyLeaderName;
-    const societyMainSocialLinkIn = req.body.societyMainSocialLink;
-    const societyDescriptionIn = req.body.societyDescription;
+    const societyLeaderNameIn = req.body.societyLeaderNameIn;
+    const societyMainSocialLinkIn = req.body.societyMainSocialLinkIn;
+    const societyDescriptionIn = req.body.societyDescriptionIn;
     //Check that all the parameters are not null
+    const parameterPresenceCheckDetails = {
+      societyNameIn: societyNameIn !== null && societyNameIn !== undefined,
+      societyLeaderNameIn:
+        societyLeaderNameIn !== null && societyLeaderNameIn !== undefined,
+      societyMainSocialLinkIn:
+        societyMainSocialLinkIn !== null &&
+        societyMainSocialLinkIn !== undefined,
+      societyDescriptionIn:
+        societyDescriptionIn !== null && societyDescriptionIn !== undefined,
+    };
+    console.log();
+
     if (
-      societyNameIn === null ||
-      societyLeaderUsernameIn === null ||
-      societyLeaderNameIn === null ||
-      societyMainSocialLinkIn === null ||
-      societyDescriptionIn === null
+      !Object.keys(parameterPresenceCheckDetails).every((key) => {
+        return parameterPresenceCheckDetails[key];
+      })
     ) {
       return res.send({
         status: 'failure',
         message: 'missingParameters',
-        parameterPresenceCheckDetails: {
-          societyName: societyNameIn !== null,
-          societyLeaderUsername: societyLeaderUsernameIn !== null,
-          societyLeaderName: societyLeaderNameIn !== null,
-          societyMainSocialLink: societyMainSocialLinkIn !== null,
-          societyDescription: societyDescriptionIn !== null,
-        },
+        parameterPresenceCheckDetails: parameterPresenceCheckDetails,
       });
     }
+    //Validate inputs
+    const validationCheckDetails = {
+      societyNameIn: validation.validateLongName(societyNameIn),
+      societyLeaderNameIn: validation.validateMediumName(societyLeaderNameIn),
+      societyMainSocialLinkIn: validation.validateLongName(
+        societyMainSocialLinkIn
+      ),
+      societyDescriptionIn:
+        validation.validateMediumDescription(societyDescriptionIn),
+    };
+    if (
+      !Object.keys(validationCheckDetails).every((key) => {
+        return validationCheckDetails[key];
+      })
+    ) {
+      return res.send({
+        status: 'failure',
+        reason: 'invalidInputFormat',
+        validationCheckDetails: validationCheckDetails,
+      });
+    }
+    //Add the society to the database
+    // const dbResult = await db.query();
+
+    return res.send({
+      status: 'success',
+      message: 'societyAdded',
+    });
   } catch (err) {
     console.log(err);
     return res.send({

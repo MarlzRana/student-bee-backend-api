@@ -103,6 +103,16 @@ function validateShortDescription() {
   return true;
 }
 
+function validateMediumDescription() {
+  const descriptionRegex = /^\w{0,1000}$/;
+  for (let i = 0; i < arguments.length; i++) {
+    if (!descriptionRegex.test(arguments[i])) {
+      return false;
+    }
+  }
+  return true;
+}
+
 function validateBio() {
   const descriptionRegex = /^(\w|\s){0,150}$/;
   for (let i = 0; i < arguments.length; i++) {
@@ -135,6 +145,7 @@ module.exports = {
   validateInternationalPhoneNumber: validateInternationalPhoneNumber,
   validateDOB: validateDOB,
   validateShortDescription: validateShortDescription,
+  validateMediumDescription: validateMediumDescription,
   validateBio: validateBio,
   validateStudentYear: validateStudentYear,
 };
