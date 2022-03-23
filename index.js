@@ -45,10 +45,12 @@ app.use(
 //Importing our routes
 const loginSystem = require('./routes/loginSystem');
 const eventsSystem = require('./routes/eventsSystem');
+const societiesSystem = require('./routes/societiesSystem');
 
 //Configuring our routes as "middleware"
 app.use('/loginSystem', loginSystem);
 app.use('/eventsSystem', eventsSystem);
+app.use('/societiesSystem', societiesSystem);
 
 //Setting up the database connection
 const dbConfig = {
