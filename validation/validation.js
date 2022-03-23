@@ -133,6 +133,16 @@ function validateStudentYear() {
   return true;
 }
 
+function validateLink() {
+  const linkRegex =
+    /^[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)$/;
+  for (let i = 0; i < arguments.length; i++) {
+    if (!linkRegex.test(arguments[i])) {
+      return false;
+    }
+  }
+  return true;
+}
 module.exports = {
   validateName: validateName,
   validateMediumName: validateMediumName,
@@ -148,6 +158,7 @@ module.exports = {
   validateMediumDescription: validateMediumDescription,
   validateBio: validateBio,
   validateStudentYear: validateStudentYear,
+  validateLink: validateLink,
 };
 
 // /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;

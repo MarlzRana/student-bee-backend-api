@@ -6,6 +6,7 @@ require('dotenv').config();
 
 //Importing local file dependencies
 const validation = require('../validation/validation');
+const tbl_societies = require('../database/tbl_societies');
 //Environmental variables
 
 //Package setup
@@ -32,7 +33,7 @@ router.route('/add').post(async (req, res) => {
     }
     //Get the parameters provided in the response
     const societyNameIn = req.body.societyNameIn;
-    const societyLeaderUsernameIn = req.session.user.userID;
+    const societyLeaderUserIDIn = req.session.user.userID;
     const societyLeaderNameIn = req.body.societyLeaderNameIn;
     const societyMainSocialLinkIn = req.body.societyMainSocialLinkIn;
     const societyDescriptionIn = req.body.societyDescriptionIn;
@@ -64,9 +65,7 @@ router.route('/add').post(async (req, res) => {
     const validationCheckDetails = {
       societyNameIn: validation.validateLongName(societyNameIn),
       societyLeaderNameIn: validation.validateMediumName(societyLeaderNameIn),
-      societyMainSocialLinkIn: validation.validateLongName(
-        societyMainSocialLinkIn
-      ),
+      societyMainSocialLinkIn: validation.validateLink(societyMainSocialLinkIn),
       societyDescriptionIn:
         validation.validateMediumDescription(societyDescriptionIn),
     };
@@ -82,8 +81,13 @@ router.route('/add').post(async (req, res) => {
       });
     }
     //Add the society to the database
-    // const dbResult = await db.query();
-
+    const dbResult = await tbl_societies.addNewRecord(
+      societyLeaderUserIDIn,
+      societyLeaderNameIn,
+      societyNameIn,
+      societyMainSocialLinkIn,
+      societyDescriptionIn
+    );
     return res.send({
       status: 'success',
       message: 'societyAdded',
