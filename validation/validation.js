@@ -114,7 +114,7 @@ function validateBio() {
 }
 
 function validateStudentYear() {
-  const descriptionRegex = /^\w{1,10}$/;
+  const descriptionRegex = /^(1st|2nd|3rd|[4-9]th)$/;
   for (let i = 0; i < arguments.length; i++) {
     if (!descriptionRegex.test(arguments[i])) {
       return false;
