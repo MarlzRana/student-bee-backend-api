@@ -197,7 +197,7 @@ router.route("/getEventDetails/:eventID").get(async (req, res) => {
     });
   } catch (error) {
     return res.send({
-      status: "failure",
+      status: "error",
     });
   }
 });
