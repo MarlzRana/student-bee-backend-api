@@ -154,10 +154,17 @@ router.route("/top10MostRecentEvents").get(async (req, res) => {
   }
 });
 
-router.route("/getEventDetails/:eventID").get(async (req, res) => {
+router.route("/getEventDetails").post(async (req, res) => {
   try {
-    // const enteredEventID = parseInt(req.body.eventID);
-    const enteredEventID = parseInt(req.params.eventID);
+    //Check if the user is logged in
+    if (!req.session.user) {
+      return res.send({
+        status: "failure",
+        reason: "notLoggedIn",
+      });
+    }
+
+    const enteredEventID = parseInt(req.body.eventID);
 
     //Presence check + validation check for enteredEventID
     const validID = validation.validateID(enteredEventID);
@@ -166,7 +173,6 @@ router.route("/getEventDetails/:eventID").get(async (req, res) => {
       return res.send({
         status: "failure",
         reason: "Invalid ID format",
-        enteredID: enteredEventID,
       });
     }
 
