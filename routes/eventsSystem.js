@@ -158,6 +158,7 @@ router.route("/getEventDetails/:eventID").get(async (req, res) => {
   try {
     // const enteredEventID = parseInt(req.body.eventID);
     const enteredEventID = parseInt(req.params.eventID);
+
     //Presence check + validation check for enteredEventID
     const validID = validation.validateID(enteredEventID);
 
