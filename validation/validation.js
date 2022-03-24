@@ -111,7 +111,7 @@ function validateShortDescription() {
 }
 
 function validateMediumDescription() {
-  const descriptionRegex = /^\w{0,1000}$/;
+  const descriptionRegex = /^(\w|\s){0,1000}$/;
   for (let i = 0; i < arguments.length; i++) {
     if (!descriptionRegex.test(arguments[i])) {
       return false;
