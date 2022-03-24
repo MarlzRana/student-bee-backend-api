@@ -7,6 +7,7 @@ require("dotenv").config();
 //Importing local file dependencies
 const validation = require("../validation/validation");
 const tbl_societies = require("../database/tbl_societies");
+const tbl_user_login_information = require("../database/tbl_user_login_information");
 //Environmental variables
 
 //Package setup
@@ -83,8 +84,8 @@ router.route("/add").post(async (req, res) => {
     //Add the society to the database
     const dbResult = await tbl_societies.addNewRecord(
       societyLeaderUserIDIn,
-      societyLeaderNameIn,
       societyNameIn,
+      societyLeaderNameIn,
       societyMainSocialLinkIn,
       societyDescriptionIn
     );
@@ -117,15 +118,15 @@ router.route("/10RandomSocieties").get(async (req, res) => {
 
     const arrOfObjToSend = await Promise.all(
       dbResult.map(async (row) => {
-        const usernameForParticularUserID =
-          await tbl_user_login_information.getUsernameByUserID(row["user_id"]);
         return {
           societyID: row["society_id"],
-          title: row["title"],
+          societyName: row["name"],
         };
       })
     );
-    return res.send(arrOfObjToSend);
+    // return res.send(arrOfObjToSend);
+    console.log(arrOfObjToSend);
+    return res.send({ status: "success", returnObjects: arrOfObjToSend });
   } catch (err) {
     console.log(err);
     return res.send({
@@ -170,10 +171,10 @@ router.route("/getSocietyDetails").post(async (req, res) => {
 
     const returnedInformation = {
       societyID: dbResult.society_id,
-      userID: dbResult.user_id,
-      title: dbResult.title,
-      leaderName: dbResult.organizer_name,
-      contactLinks: dbResult.contactLinks,
+      userID: dbResult.leader_user_id,
+      title: dbResult.name,
+      leaderName: dbResult.leader_name,
+      contactLinks: dbResult.main_social_link,
       description: dbResult.description,
     };
 
@@ -182,6 +183,7 @@ router.route("/getSocietyDetails").post(async (req, res) => {
       societyInformation: returnedInformation,
     });
   } catch (error) {
+    console.log(error);
     return res.send({
       status: "error",
     });

@@ -25,8 +25,8 @@ const db = mysql2.createPool(dbConfig);
 
 async function addNewRecord(
   leaderUserIDIn,
-  leaderNameIn,
   societyNameIn,
+  leaderNameIn,
   mainSocialLinkIn,
   descriptionIn
 ) {
@@ -36,8 +36,8 @@ async function addNewRecord(
         "CALL rt_add_new_record_tbl_societies(?,?,?,?,?, @events_id_used_out); SELECT @society_id_used_out;",
         [
           leaderUserIDIn,
-          leaderNameIn,
           societyNameIn,
+          leaderNameIn,
           mainSocialLinkIn,
           descriptionIn,
         ]

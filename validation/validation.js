@@ -150,6 +150,16 @@ function validateLink() {
   }
   return true;
 }
+
+function validateID() {
+  const descriptionRegex = /^\d+$/;
+  for (let i = 0; i < arguments.length; i++) {
+    if (!descriptionRegex.test(arguments[i])) {
+      return false;
+    }
+  }
+  return true;
+}
 module.exports = {
   validateName: validateName,
   validateMediumName: validateMediumName,
@@ -166,6 +176,5 @@ module.exports = {
   validateBio: validateBio,
   validateStudentYear: validateStudentYear,
   validateLink: validateLink,
+  validateID: validateID,
 };
-
-// /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
