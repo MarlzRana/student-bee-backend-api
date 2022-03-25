@@ -140,7 +140,6 @@ function validateStudentYear() {
   return true;
 }
 
-<<<<<<< HEAD
 function validateLink() {
   const linkRegex =
     /^[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)$/;
@@ -152,8 +151,6 @@ function validateLink() {
   return true;
 }
 
-=======
->>>>>>> cde8e240385528a6560982f52a80dc75d111e5ab
 function validateID() {
   const descriptionRegex = /^\d+$/;
   for (let i = 0; i < arguments.length; i++) {
@@ -163,10 +160,6 @@ function validateID() {
   }
   return true;
 }
-<<<<<<< HEAD
-=======
-
->>>>>>> cde8e240385528a6560982f52a80dc75d111e5ab
 module.exports = {
   validateName: validateName,
   validateMediumName: validateMediumName,
@@ -182,9 +175,6 @@ module.exports = {
   validateMediumDescription: validateMediumDescription,
   validateBio: validateBio,
   validateStudentYear: validateStudentYear,
-<<<<<<< HEAD
   validateLink: validateLink,
-=======
->>>>>>> cde8e240385528a6560982f52a80dc75d111e5ab
   validateID: validateID,
 };
