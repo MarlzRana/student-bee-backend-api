@@ -1,5 +1,5 @@
-const mysql2 = require('mysql2/promise');
-const fs = require('fs');
+const mysql2 = require("mysql2/promise");
+const fs = require("fs");
 
 //Environmental variables
 const DBHOSTSERVERADDRESS = process.env.DBHOSTSERVERADDRESS;
@@ -37,7 +37,7 @@ async function addNewRecord(
   return new Promise(async (resolve, reject) => {
     try {
       const [dbResult] = await db.query(
-        'CALL rt_add_new_record_tbl_events(?,?,?,?,?,?,?,?,?, @events_id_used_out); SELECT @events_id_used_out;',
+        "CALL rt_add_new_record_tbl_events(?,?,?,?,?,?,?,?,?, @events_id_used_out); SELECT @events_id_used_out;",
         [
           userIDIn,
           titleIn,
@@ -50,10 +50,10 @@ async function addNewRecord(
           descriptionIn,
         ]
       );
-      return resolve(dbResult[1][0]['@events_id_used_out']);
+      return resolve(dbResult[1][0]["@events_id_used_out"]);
     } catch (err) {
       resolve(false);
-      throw '\nThere was an error when adding a new record to tbl_events\n';
+      throw "\nThere was an error when adding a new record to tbl_events\n";
     }
   });
 }
@@ -62,17 +62,35 @@ async function getTop10MostRecentEvents() {
   return new Promise(async (resolve, reject) => {
     try {
       const [dbResult] = await db.query(
-        'CALL rt_get_top_10_most_recent_events_tbl_events();'
+        "CALL rt_get_top_10_most_recent_events_tbl_events();"
       );
       return resolve(dbResult[0]);
     } catch (err) {
       console.log(err);
       resolve(false);
-      throw '\nThere was an error when adding a new record to tbl_events\n';
+      throw "\nThere was an error when adding a new record to tbl_events\n";
     }
   });
 }
+
+async function getEventInformation(eventID) {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const [dbResult] = await db.query(
+        "CALL rt_select_record_tbl_events(?);",
+        [eventID]
+      );
+      return resolve(dbResult[0][0]);
+    } catch (err) {
+      console.log(err);
+      throw "\nThere was an error when adding a new record to tbl_events\n";
+      resolve(false);
+    }
+  });
+}
+
 module.exports = {
   addNewRecord: addNewRecord,
   getTop10MostRecentEvents: getTop10MostRecentEvents,
+  getEventInformation: getEventInformation,
 };
