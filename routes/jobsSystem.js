@@ -194,6 +194,8 @@ router.route("/getJobDetails").post(async (req, res) => {
       return res.send({
         status: "failure",
         reason: "Invalid ID format",
+        enteredID: enteredJobID,
+        enteredBody: req.body,
       });
     }
 
@@ -220,7 +222,7 @@ router.route("/getJobDetails").post(async (req, res) => {
       employerContactEmail: dbResult.contact_email,
       employerContactPhoneNumber: dbResult.contact_phone_number,
       wage: dbResult.wage,
-      link: dbResult.link,
+      applicationLink: dbResult.link,
       workingHours: dbResult.working_hours,
     };
 
