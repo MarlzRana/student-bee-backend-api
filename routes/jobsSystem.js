@@ -151,7 +151,12 @@ router.route("/8RandomJobs").get(async (req, res) => {
           employerUserID: row["employer_user_id"],
           jobTitle: row["job_title"],
           location: row["location"],
-          startDate: row["start_date"],
+          startDate:
+            row["start_date"].getUTCDate() +
+            "/" +
+            (row["start_date"].getUTCMonth() + 1) +
+            "/" +
+            row["start_date"].getUTCFullYear(),
           description: row["description"],
           employerContactEmail: row["contact_email"],
           employerContactPhoneNumber: row["contact_phone_number"],
@@ -205,7 +210,12 @@ router.route("/getJobDetails").post(async (req, res) => {
       employerUserID: dbResult.employer_user_id,
       jobTitle: dbResult.job_title,
       location: dbResult.location,
-      startDate: dbResult.start_date,
+      startDate:
+        dbResult.start_date.getUTCDate() +
+        "/" +
+        (dbResult.start_date.getUTCMonth() + 1) +
+        "/" +
+        dbResult.start_date.getUTCFullYear(),
       description: dbResult.description,
       employerContactEmail: dbResult.contact_email,
       employerContactPhoneNumber: dbResult.contact_phone_number,
