@@ -17,7 +17,7 @@ router.use(express.urlencoded({ extended: true }));
 //A default gateway to test if API server is accessible
 router.route("/").get((req, res) => {
   return res.send({
-    message: "Default gateway of student-bee-backend-api route:/eventsSystem",
+    message: "Default gateway of student-bee-backend-api route:/jobsSystem",
   });
 });
 
@@ -32,7 +32,7 @@ router.route("/addJob").post(async (req, res) => {
     }
     //Get the parameters provided in the response
     const employerUserIDIn = req.session.user.userID;
-    const jobNamein = req.body.jobName;
+    const jobNameIn = req.body.jobName;
     const wageIn = req.body.wage;
     const workingHoursIn = req.body.workingHours;
     const locationIn = req.body.location;
@@ -44,7 +44,7 @@ router.route("/addJob").post(async (req, res) => {
     //Check that all the parameters are not null
     if (
       wageIn === null ||
-      jobNamein === null ||
+      jobNameIn === null ||
       workingHoursIn === null ||
       locationIn === null ||
       startDateIn === null ||
@@ -58,7 +58,7 @@ router.route("/addJob").post(async (req, res) => {
         status: "failure",
         message: "missingParameters",
         parameterPresenceCheckDetails: {
-          jobName: jobNamein !== null,
+          jobName: jobNameIn !== null,
           wage: wageIn !== null,
           workingHours: workingHoursIn !== null,
           startDateTime: startDateTimeIn !== null,
@@ -73,7 +73,7 @@ router.route("/addJob").post(async (req, res) => {
     }
     //Validate inputs
     const validationCheckDetails = {
-      jobNameIn: validation.validateLongName(jobNamein),
+      jobNameIn: validation.validateLongName(jobNameIn),
       wageIn: validation.validateWeeklyWage(wageIn),
       workingHoursIn: validation.validateWeeklyWorkingHours(workingHoursIn),
       locationIn: validation.validateLongName(locationIn),
@@ -109,7 +109,7 @@ router.route("/addJob").post(async (req, res) => {
 
     //Add the event to the database
     const dbResult = await tbl_jobs.addNewRecord(
-      jobNamein,
+      jobNameIn,
       wageIn,
       workingHoursIn,
       locationIn,
@@ -120,14 +120,11 @@ router.route("/addJob").post(async (req, res) => {
       employerUserIDIn,
       applicationLinkIn
     );
-    console.log("Success");
     return res.send({
       status: "success",
       message: "eventAdded",
     });
   } catch (err) {
-    console.log();
-    console.log(err);
     return res.send({
       status: "failure",
       reason: "internalError",
@@ -135,5 +132,97 @@ router.route("/addJob").post(async (req, res) => {
   }
 });
 
-router.route("/getEventByEventName").get(async (req, res) => {});
+router.route("/8RandomJobs").get(async (req, res) => {
+  try {
+    //Check if the user is logged in
+    if (!req.session.user) {
+      return res.send({
+        status: "failure",
+        reason: "notLoggedIn",
+      });
+    }
+
+    const dbResult = await tbl_jobs.get8RandomJobs();
+
+    const arrOfObjToSend = await Promise.all(
+      dbResult.map(async (row) => {
+        return {
+          jobID: row["job_id"],
+          employerUserID: row["employer_user_id"],
+          jobTitle: row["job_title"],
+          location: row["location"],
+          startDate: row["start_date"],
+          description: row["description"],
+          employerContactEmail: row["contact_email"],
+          employerContactPhoneNumber: row["contact_phone_number"],
+          wage: row["wage"],
+          link: row["link"],
+          workingHours: row["working_hours"],
+        };
+      })
+    );
+    return res.send({ events: arrOfObjToSend });
+  } catch (err) {
+    return res.send({
+      status: "failure",
+      reason: "internalError",
+    });
+  }
+});
+
+router.route("/getJobDetails").post(async (req, res) => {
+  try {
+    //Check if the user is logged in
+    if (!req.session.user) {
+      return res.send({
+        status: "failure",
+        reason: "notLoggedIn",
+      });
+    }
+
+    const enteredJobID = parseInt(req.body.jobID);
+
+    //Presence check + validation check for enteredEventID
+    const validID = validation.validateID(enteredJobID);
+
+    if (!validID) {
+      return res.send({
+        status: "failure",
+        reason: "Invalid ID format",
+      });
+    }
+
+    const dbResult = await tbl_jobs.getJobInformation(enteredJobID);
+    if (dbResult === undefined) {
+      return res.send({
+        status: "failure",
+        reason: "This event does not exist",
+      });
+    }
+
+    const returnedInformation = {
+      jobID: dbResult.job_id,
+      employerUserID: dbResult.employer_user_id,
+      jobTitle: dbResult.job_title,
+      location: dbResult.location,
+      startDate: dbResult.start_date,
+      description: dbResult.description,
+      employerContactEmail: dbResult.contact_email,
+      employerContactPhoneNumber: dbResult.contact_phone_number,
+      wage: dbResult.wage,
+      link: dbResult.link,
+      workingHours: dbResult.working_hours,
+    };
+
+    return res.send({
+      status: "success",
+      jobInformation: returnedInformation,
+    });
+  } catch (error) {
+    return res.send({
+      status: "error",
+    });
+  }
+});
+
 module.exports = router;
