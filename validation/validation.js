@@ -39,6 +39,13 @@ function validateDate() {
 }
 
 function validateDateTime() {
+  const dateTimeRegex =
+    /^\d\d\d\d-(0?[1-9]|1[0-2])-(0?[1-9]|[12][0-9]|3[01])(\s|T)(00|[0-9]|1[0-9]|2[0-3]):([0-9]|[0-5][0-9]):([0-9]|[0-5][0-9])$/;
+  for (let i = 0; i < arguments.length; i++) {
+    if (!dateTimeRegex.test(arguments[i])) {
+      return false;
+    }
+  }
   return true;
 }
 
@@ -103,6 +110,16 @@ function validateShortDescription() {
   return true;
 }
 
+function validateMediumDescription() {
+  const descriptionRegex = /^(\w|\s){0,1000}$/;
+  for (let i = 0; i < arguments.length; i++) {
+    if (!descriptionRegex.test(arguments[i])) {
+      return false;
+    }
+  }
+  return true;
+}
+
 function validateBio() {
   const descriptionRegex = /^(\w|\s){0,150}$/;
   for (let i = 0; i < arguments.length; i++) {
@@ -123,6 +140,17 @@ function validateStudentYear() {
   return true;
 }
 
+function validateLink() {
+  const linkRegex =
+    /^[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)$/;
+  for (let i = 0; i < arguments.length; i++) {
+    if (!linkRegex.test(arguments[i])) {
+      return false;
+    }
+  }
+  return true;
+}
+
 function validateID() {
   const descriptionRegex = /^\d+$/;
   for (let i = 0; i < arguments.length; i++) {
@@ -132,7 +160,6 @@ function validateID() {
   }
   return true;
 }
-
 module.exports = {
   validateName: validateName,
   validateMediumName: validateMediumName,
@@ -145,9 +172,9 @@ module.exports = {
   validateInternationalPhoneNumber: validateInternationalPhoneNumber,
   validateDOB: validateDOB,
   validateShortDescription: validateShortDescription,
+  validateMediumDescription: validateMediumDescription,
   validateBio: validateBio,
   validateStudentYear: validateStudentYear,
+  validateLink: validateLink,
   validateID: validateID,
 };
-
-// /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
