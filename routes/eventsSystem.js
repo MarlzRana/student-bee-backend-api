@@ -123,6 +123,14 @@ router.route("/addEvent").post(async (req, res) => {
 
 router.route("/top10MostRecentEvents").get(async (req, res) => {
   try {
+    //Check if the user is logged in
+    if (!req.session.user) {
+      return res.send({
+        status: "failure",
+        reason: "notLoggedIn",
+      });
+    }
+
     const dbResult = await tbl_events.getTop10MostRecentEvents();
     // console.log(dbResult);
 

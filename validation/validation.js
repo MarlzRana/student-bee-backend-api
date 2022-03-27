@@ -101,7 +101,7 @@ function validateDOB() {
 }
 
 function validateShortDescription() {
-  const descriptionRegex = /^\w{0,300}$/;
+  const descriptionRegex = /^.{0,300}$/;
   for (let i = 0; i < arguments.length; i++) {
     if (!descriptionRegex.test(arguments[i])) {
       return false;
@@ -160,6 +160,27 @@ function validateID() {
   }
   return true;
 }
+
+function validateWeeklyWage() {
+  const descriptionRegex = /^\d{1,4}$/;
+  for (let i = 0; i < arguments.length; i++) {
+    if (!descriptionRegex.test(arguments[i])) {
+      return false;
+    }
+  }
+  return true;
+}
+
+function validateWeeklyWorkingHours() {
+  const descriptionRegex = /^\d{1,3}$/;
+  for (let i = 0; i < arguments.length; i++) {
+    if (!descriptionRegex.test(arguments[i])) {
+      return false;
+    }
+  }
+  return true;
+}
+
 module.exports = {
   validateName: validateName,
   validateMediumName: validateMediumName,
@@ -177,4 +198,6 @@ module.exports = {
   validateStudentYear: validateStudentYear,
   validateLink: validateLink,
   validateID: validateID,
+  validateWeeklyWage: validateWeeklyWage,
+  validateWeeklyWorkingHours: validateWeeklyWorkingHours,
 };

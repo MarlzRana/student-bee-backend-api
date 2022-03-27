@@ -1,14 +1,14 @@
-'use strict';
+"use strict";
 //Imported packages
-const express = require('express');
-const mysql2 = require('mysql2/promise');
-const fs = require('fs');
-const cors = require('cors');
-const bcrypt = require('bcrypt');
-const bodyParser = require('body-parser');
-const cookieParser = require('cookie-parser');
-const session = require('express-session');
-require('dotenv').config();
+const express = require("express");
+const mysql2 = require("mysql2/promise");
+const fs = require("fs");
+const cors = require("cors");
+const bcrypt = require("bcrypt");
+const bodyParser = require("body-parser");
+const cookieParser = require("cookie-parser");
+const session = require("express-session");
+require("dotenv").config();
 
 //Environmental variables
 const PORT = process.env.PORT || 3001;
@@ -26,15 +26,15 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(
   cors({
-    origin: ['http://localhost:3000'],
-    methods: ['GET', 'POST'],
+    origin: ["http://localhost:3000"],
+    methods: ["GET", "POST"],
     credentials: true,
   })
 );
 app.use(cookieParser());
 app.use(
   session({
-    key: '',
+    key: "",
     secret: bcrypt.genSaltSync(SALTROUNDS),
     resave: false,
     saveUninitialized: false,
@@ -43,14 +43,16 @@ app.use(
 );
 
 //Importing our routes
-const loginSystem = require('./routes/loginSystem');
-const eventsSystem = require('./routes/eventsSystem');
-const societiesSystem = require('./routes/societiesSystem');
+const loginSystem = require("./routes/loginSystem");
+const eventsSystem = require("./routes/eventsSystem");
+const societiesSystem = require("./routes/societiesSystem");
+const jobsSystem = require("./routes/jobsSystem");
 
 //Configuring our routes as "middleware"
-app.use('/loginSystem', loginSystem);
-app.use('/eventsSystem', eventsSystem);
-app.use('/societiesSystem', societiesSystem);
+app.use("/loginSystem", loginSystem);
+app.use("/eventsSystem", eventsSystem);
+app.use("/societiesSystem", societiesSystem);
+app.use("/jobsSystem", jobsSystem);
 
 //Setting up the database connection
 const dbConfig = {
@@ -73,16 +75,16 @@ const testDbConnection = async () => {
     await db.query(
       'SELECT * from tbl_user_login_information WHERE username="user"'
     );
-    console.log('The server is connected to studentbee-db');
+    console.log("The server is connected to studentbee-db");
   } catch (error) {
-    console.log('WARNING: Server not connected to studentbee-db');
+    console.log("WARNING: Server not connected to studentbee-db");
   }
 };
 testDbConnection();
 
 //A default gateway to test if API server is accessible
-app.get('/', (req, res) => {
-  res.send({ message: 'Default gateway of student-bee-backend-api' });
+app.get("/", (req, res) => {
+  res.send({ message: "Default gateway of student-bee-backend-api" });
 });
 
 //Tells the API what port to listen to and display's that port in the console
