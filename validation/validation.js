@@ -40,7 +40,7 @@ function validateDate() {
 
 function validateDateTime() {
   const dateTimeRegex =
-    /^\d\d\d\d-(0?[1-9]|1[0-2])-(0?[1-9]|[12][0-9]|3[01])(\s|T)(00|[0-9]|1[0-9]|2[0-3]):([0-9]|[0-5][0-9]):([0-9]|[0-5][0-9])$/;
+    /^(\d\d\d\d-(0?[1-9]|1[0-2])-(0?[1-9]|[12][0-9]|3[01])(\s|T)(00|[0-9]|1[0-9]|2[0-3]):([0-9]|[0-5][0-9]):([0-9]|[0-5][0-9]))|(\d\d\d\d-(0?[1-9]|1[0-2])-(0?[1-9]|[12][0-9]|3[01])(\s|T)(00|[0-9]|1[0-9]|2[0-3]):([0-9]|[0-5][0-9]))$/;
   for (let i = 0; i < arguments.length; i++) {
     if (!dateTimeRegex.test(arguments[i])) {
       return false;
@@ -101,7 +101,7 @@ function validateDOB() {
 }
 
 function validateShortDescription() {
-  const descriptionRegex = /^(\w|\s|[.!?\\'-]){0,300}$/;
+  const descriptionRegex = /^(\w|\s|[.,!?\\'-]){0,300}$/;
   for (let i = 0; i < arguments.length; i++) {
     if (!descriptionRegex.test(arguments[i])) {
       return false;
@@ -111,7 +111,7 @@ function validateShortDescription() {
 }
 
 function validateMediumDescription() {
-  const descriptionRegex = /^(\w|\s|[.!?\\'-]){0,1000}$/;
+  const descriptionRegex = /^(\w|\s|[.,!?\\'-]){0,1000}$/;
   for (let i = 0; i < arguments.length; i++) {
     if (!descriptionRegex.test(arguments[i])) {
       return false;
