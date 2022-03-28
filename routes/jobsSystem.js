@@ -362,8 +362,58 @@ router.route("/editJobDetails").post(async (req, res) => {
 
     return res.send({
       status: "success",
-      message: "Society successfully edited",
+      message: "Job successfully edited",
     });
+  } catch (error) {
+    console.log(error);
+    return res.send({
+      status: "error",
+    });
+  }
+});
+
+router.route("/ownsJob").post(async (req, res) => {
+  try {
+    //Check if the user is logged in
+    if (!req.session.user) {
+      return res.send({
+        status: "failure",
+        reason: "notLoggedIn",
+      });
+    }
+
+    const jobID = req.body.jobID;
+    const userID = req.session.user.userID;
+
+    const dbResult = await tbl_jobs.getJobInformation(jobID);
+    if (dbResult === undefined) {
+      return res.send({
+        status: "failure",
+        reason: "This society does not exist",
+      });
+    }
+
+    //Presence check + validation check for societyID
+    const validID = validation.validateID(jobID);
+
+    if (!validID) {
+      return res.send({
+        status: "failure",
+        reason: "Invalid ID format",
+      });
+    }
+
+    if (dbResult.employer_user_id !== userID) {
+      return res.send({
+        status: "success",
+        owned: false,
+      });
+    } else {
+      return res.send({
+        status: "success",
+        owned: true,
+      });
+    }
   } catch (error) {
     console.log(error);
     return res.send({
