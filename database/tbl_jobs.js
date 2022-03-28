@@ -87,8 +87,48 @@ async function getJobInformation(jobIDIn) {
   });
 }
 
+async function editJob(
+  jobIDIn,
+  jobTitleIn,
+  locationIn,
+  startDateIn,
+  descriptionIn,
+  employerContactEmailIn,
+  employerContactPhoneNumberIn,
+  wageIn,
+  linkIn,
+  workingHoursIn
+) {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const [dbResult] = await db.query(
+        "CALL rt_edit_record_tbl_jobs(?,?,?,?,?,?,?,?,?,?)",
+        [
+          jobIDIn,
+          jobTitleIn,
+          locationIn,
+          startDateIn,
+          descriptionIn,
+          employerContactEmailIn,
+          employerContactPhoneNumberIn,
+          wageIn,
+          linkIn,
+          workingHoursIn,
+        ]
+      );
+      console.log(dbResult);
+      return resolve(true);
+    } catch (err) {
+      console.log(err);
+      resolve(false);
+      throw "\nThere was an error when editing a record from tbl_jobs";
+    }
+  });
+}
+
 module.exports = {
   addNewRecord: addNewRecord,
   get8RandomJobs: get8RandomJobs,
   getJobInformation: getJobInformation,
+  editJob: editJob,
 };

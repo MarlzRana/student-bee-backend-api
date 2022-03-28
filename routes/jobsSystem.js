@@ -237,4 +237,139 @@ router.route("/getJobDetails").post(async (req, res) => {
   }
 });
 
+router.route("/editJobDetails").post(async (req, res) => {
+  try {
+    //Check if the user is logged in
+    if (!req.session.user) {
+      return res.send({
+        status: "failure",
+        message: "notLoggedIn",
+      });
+    }
+    //Get the parameters provided in the response
+    const jobNameIn = req.body.jobName;
+    const wageIn = parseInt(req.body.wage);
+    const workingHoursIn = parseInt(req.body.workingHours);
+    const locationIn = req.body.location;
+    const startDateIn = req.body.startDate;
+    const descriptionIn = req.body.description;
+    const employerEmailIn = req.body.employerEmail;
+    const employerPhoneNumberIn = req.body.employerPhoneNumber;
+    const applicationLinkIn = req.body.link;
+    //Check that all the parameters are not null
+    if (
+      wageIn === null ||
+      jobNameIn === null ||
+      workingHoursIn === null ||
+      locationIn === null ||
+      startDateIn === null ||
+      descriptionIn === null ||
+      employerEmailIn === null ||
+      employerPhoneNumberIn === null ||
+      applicationLinkIn === null
+    ) {
+      return res.send({
+        status: "failure",
+        message: "missingParameters",
+        parameterPresenceCheckDetails: {
+          jobName: jobNameIn !== null,
+          wage: wageIn !== null,
+          workingHours: workingHoursIn !== null,
+          startDateTime: startDateTimeIn !== null,
+          location: locationIn !== null,
+          employerEmail: employerEmailIn !== null,
+          employerPhoneNumber: employerPhoneNumberIn !== null,
+          description: descriptionIn !== null,
+          applicationLink: applicationLinkIn !== null,
+        },
+      });
+    }
+    //Validate inputs
+    const validationCheckDetails = {
+      jobNameIn: validation.validateLongName(jobNameIn),
+      wageIn: validation.validateWeeklyWage(wageIn),
+      workingHoursIn: validation.validateWeeklyWorkingHours(workingHoursIn),
+      locationIn: validation.validateLongName(locationIn),
+      startDateIn: validation.validateDate(startDateIn),
+      descriptionIn: validation.validateShortDescription(descriptionIn),
+      employerEmailIn: validation.validateEmail(employerEmailIn),
+      employerPhoneNumberIn: validation.validateInternationalPhoneNumber(
+        employerPhoneNumberIn
+      ),
+      applicationLinkIn: validation.validateLink(applicationLinkIn),
+    };
+    if (
+      !(
+        validationCheckDetails.jobNameIn &&
+        validationCheckDetails.wageIn &&
+        validationCheckDetails.workingHoursIn &&
+        validationCheckDetails.locationIn &&
+        validationCheckDetails.startDateIn &&
+        validationCheckDetails.descriptionIn &&
+        validationCheckDetails.employerEmailIn &&
+        validationCheckDetails.employerPhoneNumberIn &&
+        validationCheckDetails.applicationLinkIn
+      )
+    ) {
+      return res.send({
+        status: "failure",
+        reason: "invalidInputFormat",
+        validationCheckDetails: validationCheckDetails,
+      });
+    }
+
+    //Presence check + validation check for enteredJobID
+    const jobID = req.body.jobID;
+    const validID = validation.validateID(jobID);
+
+    if (!validID) {
+      return res.send({
+        status: "failure",
+        reason: "Invalid ID format",
+      });
+    }
+
+    const dbResult = await tbl_jobs.getJobInformation(jobID);
+    if (dbResult === undefined) {
+      return res.send({
+        status: "failure",
+        reason: "This society does not exist",
+      });
+    }
+
+    // Check if job belongs to user
+    const userID = req.session.user.userID;
+    if (dbResult.employer_user_id !== userID) {
+      return res.send({
+        status: "failure",
+        reason: "You do not own this job",
+      });
+    }
+
+    // Edit the job in the database
+    const dbResult2 = await tbl_jobs.editJob(
+      jobID,
+      jobNameIn,
+      locationIn,
+      startDateIn,
+      descriptionIn,
+      employerEmailIn,
+      employerPhoneNumberIn,
+      wageIn,
+      applicationLinkIn,
+      workingHoursIn
+    );
+
+    return res.send({
+      status: "success",
+      message: "Society successfully edited",
+    });
+  } catch (error) {
+    console.log(error);
+    return res.send({
+      status: "error",
+    });
+  }
+});
+
 module.exports = router;

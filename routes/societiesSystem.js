@@ -202,10 +202,10 @@ router.route("/editSocietyDetails").post(async (req, res) => {
     //Get the parameters provided in the response
     const societyIDIn = req.body.societyID;
     const societyNameIn = req.body.societyNameIn;
-    // const societyLeaderUserIDIn = req.session.user.userID;
     const societyLeaderNameIn = req.body.societyLeaderNameIn;
     const societyMainSocialLinkIn = req.body.societyMainSocialLinkIn;
     const societyDescriptionIn = req.body.societyDescriptionIn;
+
     //Check that all the parameters are not null
     const parameterPresenceCheckDetails = {
       societyNameIn: societyNameIn !== null && societyNameIn !== undefined,
@@ -268,7 +268,7 @@ router.route("/editSocietyDetails").post(async (req, res) => {
       });
     }
 
-    // Check if event belongs to user
+    // Check if society belongs to user
     const userID = req.session.user.userID;
     if (dbResult.leader_user_id !== userID) {
       return res.send({
