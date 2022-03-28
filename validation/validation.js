@@ -101,7 +101,7 @@ function validateDOB() {
 }
 
 function validateShortDescription() {
-  const descriptionRegex = /^.{0,300}$/;
+  const descriptionRegex = /^(\w|\s|[.!?\\-]){0,300}$/;
   for (let i = 0; i < arguments.length; i++) {
     if (!descriptionRegex.test(arguments[i])) {
       return false;
@@ -111,7 +111,7 @@ function validateShortDescription() {
 }
 
 function validateMediumDescription() {
-  const descriptionRegex = /^(\w|\s){0,1000}$/;
+  const descriptionRegex = /^(\w|\s|[.!?\\-]){0,1000}$/;
   for (let i = 0; i < arguments.length; i++) {
     if (!descriptionRegex.test(arguments[i])) {
       return false;
@@ -121,7 +121,7 @@ function validateMediumDescription() {
 }
 
 function validateBio() {
-  const descriptionRegex = /^(\w|\s){0,150}$/;
+  const descriptionRegex = /^(\w|\s|[.!?\\-]){0,150}$/;
   for (let i = 0; i < arguments.length; i++) {
     if (!descriptionRegex.test(arguments[i])) {
       return false;
@@ -181,6 +181,16 @@ function validateWeeklyWorkingHours() {
   return true;
 }
 
+function validateDigit() {
+  const descriptionRegex = /^\d$/;
+  for (let i = 0; i < arguments.length; i++) {
+    if (!descriptionRegex.test(arguments[i])) {
+      return false;
+    }
+  }
+  return true;
+}
+
 module.exports = {
   validateName: validateName,
   validateMediumName: validateMediumName,
@@ -200,4 +210,5 @@ module.exports = {
   validateID: validateID,
   validateWeeklyWage: validateWeeklyWage,
   validateWeeklyWorkingHours: validateWeeklyWorkingHours,
+  validateDigit: validateDigit,
 };

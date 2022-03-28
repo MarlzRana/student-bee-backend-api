@@ -185,7 +185,6 @@ router.route("/getEventDetails").post(async (req, res) => {
     }
 
     const dbResult = await tbl_events.getEventInformation(enteredEventID);
-    console.log(dbResult);
     if (dbResult === undefined) {
       return res.send({
         status: "failure",
