@@ -101,7 +101,7 @@ function validateDOB() {
 }
 
 function validateShortDescription() {
-  const descriptionRegex = /^(\w|\s|[.!?\\-]){0,300}$/;
+  const descriptionRegex = /^(\w|\s|[.!?\\'-]){0,300}$/;
   for (let i = 0; i < arguments.length; i++) {
     if (!descriptionRegex.test(arguments[i])) {
       return false;
@@ -111,7 +111,7 @@ function validateShortDescription() {
 }
 
 function validateMediumDescription() {
-  const descriptionRegex = /^(\w|\s|[.!?\\-]){0,1000}$/;
+  const descriptionRegex = /^(\w|\s|[.!?\\'-]){0,1000}$/;
   for (let i = 0; i < arguments.length; i++) {
     if (!descriptionRegex.test(arguments[i])) {
       return false;

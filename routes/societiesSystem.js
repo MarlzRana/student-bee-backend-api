@@ -190,4 +190,112 @@ router.route("/getSocietyDetails").post(async (req, res) => {
   }
 });
 
+router.route("/editSocietyDetails").post(async (req, res) => {
+  try {
+    //Check if the user is logged in
+    if (!req.session.user) {
+      return res.send({
+        status: "failure",
+        message: "notLoggedIn",
+      });
+    }
+    //Get the parameters provided in the response
+    const societyIDIn = req.body.societyID;
+    const societyNameIn = req.body.societyNameIn;
+    // const societyLeaderUserIDIn = req.session.user.userID;
+    const societyLeaderNameIn = req.body.societyLeaderNameIn;
+    const societyMainSocialLinkIn = req.body.societyMainSocialLinkIn;
+    const societyDescriptionIn = req.body.societyDescriptionIn;
+    //Check that all the parameters are not null
+    const parameterPresenceCheckDetails = {
+      societyNameIn: societyNameIn !== null && societyNameIn !== undefined,
+      societyLeaderNameIn:
+        societyLeaderNameIn !== null && societyLeaderNameIn !== undefined,
+      societyMainSocialLinkIn:
+        societyMainSocialLinkIn !== null &&
+        societyMainSocialLinkIn !== undefined,
+      societyDescriptionIn:
+        societyDescriptionIn !== null && societyDescriptionIn !== undefined,
+    };
+    console.log();
+
+    if (
+      !Object.keys(parameterPresenceCheckDetails).every((key) => {
+        return parameterPresenceCheckDetails[key];
+      })
+    ) {
+      return res.send({
+        status: "failure",
+        message: "missingParameters",
+        parameterPresenceCheckDetails: parameterPresenceCheckDetails,
+      });
+    }
+    //Validate inputs
+    const validationCheckDetails = {
+      societyNameIn: validation.validateLongName(societyNameIn),
+      societyLeaderNameIn: validation.validateMediumName(societyLeaderNameIn),
+      societyMainSocialLinkIn: validation.validateLink(societyMainSocialLinkIn),
+      societyDescriptionIn:
+        validation.validateMediumDescription(societyDescriptionIn),
+    };
+    if (
+      !Object.keys(validationCheckDetails).every((key) => {
+        return validationCheckDetails[key];
+      })
+    ) {
+      return res.send({
+        status: "failure",
+        reason: "invalidInputFormat",
+        validationCheckDetails: validationCheckDetails,
+      });
+    }
+
+    //Presence check + validation check for enteredEventID
+    const validID = validation.validateID(societyIDIn);
+
+    if (!validID) {
+      return res.send({
+        status: "failure",
+        reason: "Invalid ID format",
+      });
+    }
+
+    const dbResult = await tbl_societies.getSocietyInformation(societyIDIn);
+    if (dbResult === undefined) {
+      return res.send({
+        status: "failure",
+        reason: "This society does not exist",
+      });
+    }
+
+    // Check if event belongs to user
+    const userID = req.session.user.userID;
+    if (dbResult.leader_user_id !== userID) {
+      return res.send({
+        status: "failure",
+        reason: "You do not own this society",
+      });
+    }
+
+    // Edit the society in the database
+    const dbResult2 = await tbl_societies.editSociety(
+      societyIDIn,
+      societyNameIn,
+      societyLeaderNameIn,
+      societyMainSocialLinkIn,
+      societyDescriptionIn
+    );
+
+    return res.send({
+      status: "success",
+      message: "Society successfully edited",
+    });
+  } catch (error) {
+    console.log(error);
+    return res.send({
+      status: "error",
+    });
+  }
+});
+
 module.exports = router;

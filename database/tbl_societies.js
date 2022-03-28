@@ -81,8 +81,32 @@ async function getSocietyInformation(societyID) {
   });
 }
 
+async function editSociety(
+  societyIDIn,
+  nameIn,
+  leaderNameIn,
+  mainSocialLinkIn,
+  descriptionIn
+) {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const [dbResult] = await db.query(
+        "CALL rt_edit_record_tbl_societies(?,?,?,?,?)",
+        [societyIDIn, nameIn, leaderNameIn, mainSocialLinkIn, descriptionIn]
+      );
+      console.log(dbResult);
+      return resolve(true);
+    } catch (err) {
+      console.log(err);
+      resolve(false);
+      throw "\nThere was an error when editing a record from tbl_user_login_information";
+    }
+  });
+}
+
 module.exports = {
   addNewRecord: addNewRecord,
   get10RandomSocieties: get10RandomSocieties,
   getSocietyInformation: getSocietyInformation,
+  editSociety: editSociety,
 };
