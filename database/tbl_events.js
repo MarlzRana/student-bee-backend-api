@@ -83,8 +83,45 @@ async function getEventInformation(eventID) {
       return resolve(dbResult[0][0]);
     } catch (err) {
       console.log(err);
-      throw "\nThere was an error when adding a new record to tbl_events\n";
       resolve(false);
+      throw "\nThere was an error when adding a new record to tbl_events\n";
+    }
+  });
+}
+
+async function editEvent(
+  eventIDIn,
+  titleIn,
+  startDateTimeIn,
+  endDateTimeIn,
+  locationIn,
+  organizerNameIn,
+  contactEmailIn,
+  contactPhoneNumberIn,
+  descriptionIn
+) {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const [dbResult] = await db.query(
+        "CALL rt_edit_record_tbl_events(?,?,?,?,?,?,?,?,?)",
+        [
+          eventIDIn,
+          titleIn,
+          startDateTimeIn,
+          endDateTimeIn,
+          locationIn,
+          organizerNameIn,
+          contactEmailIn,
+          contactPhoneNumberIn,
+          descriptionIn,
+        ]
+      );
+      console.log(dbResult);
+      return resolve(true);
+    } catch (err) {
+      console.log(err);
+      resolve(false);
+      throw "\nThere was an error when editing a record from tbl_user_login_information";
     }
   });
 }
@@ -93,4 +130,5 @@ module.exports = {
   addNewRecord: addNewRecord,
   getTop10MostRecentEvents: getTop10MostRecentEvents,
   getEventInformation: getEventInformation,
+  editEvent: editEvent,
 };
