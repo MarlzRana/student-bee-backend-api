@@ -283,4 +283,75 @@ router.route("/editProfile").post(async (req, res) => {
   }
 });
 
+router.route("/getPersonalInformation").post(async (req, res) => {
+  try {
+    //Check if the user is logged in
+    if (!req.session.user) {
+      return res.send({
+        status: "failure",
+        reason: "notLoggedIn",
+      });
+    }
+
+    const enteredUsername = req.body.username;
+
+    //Presence check + validation check for enteredEventID
+    const validID = validation.validateUsername(enteredUsername);
+
+    if (!validID) {
+      return res.send({
+        status: "failure",
+        reason: "Invalid username format",
+      });
+    }
+
+    const dbResult =
+      await tbl_user_login_information.selectSingleRecordByUsername(
+        enteredUsername
+      );
+    if (dbResult === undefined) {
+      return res.send({
+        status: "failure",
+        reason: "This user does not exist",
+      });
+    }
+
+    console.log(dbResult);
+    const userID = dbResult.user_id;
+    console.log(userID);
+
+    const dbResult2 =
+      await tbl_user_personal_information.getPersonalInformationByUserID(
+        userID
+      );
+    if (dbResult2 === undefined) {
+      return res.send({
+        status: "failure",
+        reason: "This user does not exist",
+      });
+    }
+
+    console.log(dbResult2);
+
+    const returnedInformation = {
+      firstName: dbResult2.first_name,
+      lastName: dbResult2.last_name,
+      emailAddress: dbResult2.email_address,
+      dob: dbResult2.dob,
+      bio: dbResult2.bio,
+      studentYear: dbResult2.student_year,
+      courseName: dbResult2.course_name,
+    };
+
+    return res.send({
+      status: "success",
+      userInformation: returnedInformation,
+    });
+  } catch (error) {
+    return res.send({
+      status: "error",
+    });
+  }
+});
+
 module.exports = router;

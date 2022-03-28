@@ -73,7 +73,27 @@ async function editRecord(
   });
 }
 
+async function getPersonalInformationByUserID(userIDIn) {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const [dbResult] = await db.query(
+        "CALL rt_select_record_tbl_user_personal_information_by_user_id(?)",
+        [userIDIn]
+      );
+      if (dbResult[0].length < 1) {
+        return resolve(false);
+      }
+      return resolve(dbResult[0][0]);
+    } catch (err) {
+      console.log(err);
+      resolve(false);
+      throw "\nThere was an error when getting the username from tbl_user_login_information";
+    }
+  });
+}
+
 module.exports = {
   addNewRecord: addNewRecord,
   editRecord: editRecord,
+  getPersonalInformationByUserID: getPersonalInformationByUserID,
 };
