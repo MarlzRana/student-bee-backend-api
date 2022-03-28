@@ -354,4 +354,24 @@ router.route("/getPersonalInformation").post(async (req, res) => {
   }
 });
 
+router.route("/getCurrentUsername").get((req, res) => {
+  try {
+    //Check if the user is logged in
+    if (!req.session.user) {
+      return res.send({
+        status: "failure",
+        reason: "notLoggedIn",
+      });
+    }
+
+    const username = req.session.user.username;
+    return res.send({ status: "success", username: username });
+  } catch (error) {
+    console.log(error);
+    return { status: "error" };
+  }
+  req.session.destroy();
+  return res.send({ status: "success" });
+});
+
 module.exports = router;
