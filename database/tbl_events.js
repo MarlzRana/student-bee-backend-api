@@ -138,7 +138,7 @@ async function findRecordsByTitle(titleIn) {
     } catch (err) {
       console.log(err);
       resolve(false);
-      throw '\nThere was an error when editing a record from tbl_user_login_information';
+      throw '\nThere was an error when finding records by title from tbl_events\n';
     }
   });
 }
