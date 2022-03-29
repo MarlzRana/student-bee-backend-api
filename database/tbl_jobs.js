@@ -126,9 +126,26 @@ async function editJob(
   });
 }
 
+async function deleteJob(jobIDIn) {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const [dbResult] = await db.query("CALL rt_delete_record_tbl_jobs(?)", [
+        jobIDIn,
+      ]);
+      console.log(dbResult);
+      return resolve(true);
+    } catch (err) {
+      console.log(err);
+      resolve(false);
+      throw "\nThere was an error when deleting a record from tbl_jobs";
+    }
+  });
+}
+
 module.exports = {
   addNewRecord: addNewRecord,
   get8RandomJobs: get8RandomJobs,
   getJobInformation: getJobInformation,
   editJob: editJob,
+  deleteJob: deleteJob,
 };

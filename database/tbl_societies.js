@@ -104,9 +104,27 @@ async function editSociety(
   });
 }
 
+async function deleteSociety(societyIDIn) {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const [dbResult] = await db.query(
+        "CALL rt_delete_record_tbl_societies(?)",
+        [societyIDIn]
+      );
+      console.log(dbResult);
+      return resolve(true);
+    } catch (err) {
+      console.log(err);
+      resolve(false);
+      throw "\nThere was an error when deleting a record from tbl_societies";
+    }
+  });
+}
+
 module.exports = {
   addNewRecord: addNewRecord,
   get10RandomSocieties: get10RandomSocieties,
   getSocietyInformation: getSocietyInformation,
   editSociety: editSociety,
+  deleteSociety: deleteSociety,
 };

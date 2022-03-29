@@ -422,4 +422,53 @@ router.route("/ownsJob").post(async (req, res) => {
   }
 });
 
+router.route("/deleteJob").post(async (req, res) => {
+  try {
+    //Check if the user is logged in
+    if (!req.session.user) {
+      return res.send({
+        status: "failure",
+        reason: "notLoggedIn",
+      });
+    }
+
+    const jobID = req.body.jobID;
+    const userID = req.session.user.userID;
+
+    const validID = validation.validateID(jobID);
+
+    //Validate ID
+    if (!validID) {
+      return res.send({
+        status: "failure",
+        reason: "Invalid ID format",
+      });
+    }
+
+    //Check if job exists
+    const dbResult = await tbl_jobs.getJobInformation(jobID);
+    if (dbResult === undefined) {
+      return res.send({
+        status: "failure",
+        reason: "This society does not exist",
+      });
+    }
+
+    //Check if user owns job
+    if (dbResult.employer_user_id !== userID) {
+      return res.send({
+        status: "failure",
+        owned: false,
+      });
+    }
+
+    //Delete if they do
+    const dbResult2 = await tbl_jobs.deleteJob(jobID);
+
+    return res.send({ status: "success" });
+  } catch (error) {
+    return res.send({ status: "error" });
+  }
+});
+
 module.exports = router;
