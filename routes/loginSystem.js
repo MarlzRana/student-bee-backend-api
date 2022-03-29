@@ -370,8 +370,46 @@ router.route("/getCurrentUsername").get((req, res) => {
     console.log(error);
     return { status: "error" };
   }
-  req.session.destroy();
-  return res.send({ status: "success" });
+});
+
+router.route("/getUsernameGivenID").post(async (req, res) => {
+  try {
+    //Check if the user is logged in
+    if (!req.session.user) {
+      return res.send({
+        status: "failure",
+        reason: "notLoggedIn",
+      });
+    }
+
+    const userID = req.body.userID;
+
+    const validID = validation.validateID(userID);
+
+    if (!validID) {
+      return res.send({
+        status: "failure",
+        reason: "Invalid ID format",
+      });
+    }
+
+    const dbResult = await tbl_user_login_information.getUsernameByUserID(
+      userID
+    );
+    if (dbResult === undefined) {
+      return res.send({
+        status: "failure",
+        reason: "This user does not exist",
+      });
+    }
+
+    console.log(dbResult);
+
+    return res.send({ status: "success", username: dbResult });
+  } catch (error) {
+    console.log(error);
+    return { status: "error" };
+  }
 });
 
 module.exports = router;
