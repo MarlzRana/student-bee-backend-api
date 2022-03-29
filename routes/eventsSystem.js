@@ -216,5 +216,182 @@ router.route("/getEventDetails").post(async (req, res) => {
   }
 });
 
-router.route("/getEventByEventName").get(async (req, res) => {});
+router.route("/editEventDetails").post(async (req, res) => {
+  try {
+    //Check if the user is logged in
+    if (!req.session.user) {
+      return res.send({
+        status: "failure",
+        reason: "notLoggedIn",
+      });
+    }
+
+    const enteredEventID = parseInt(req.body.eventID);
+    const titleIn = req.body.title;
+    const startDateTimeIn = req.body.startDateTime;
+    const endDateTimeIn = req.body.endDateTime;
+    const locationIn = req.body.location;
+    const organizerNameIn = req.body.organizerName;
+    const contactEmailIn = req.body.contactEmail;
+    const contactPhoneNumberIn = req.body.contactPhoneNumber;
+    const descriptionIn = req.body.description;
+
+    //Check that all the parameters are not null
+    if (
+      titleIn === null ||
+      startDateTimeIn === null ||
+      endDateTimeIn === null ||
+      locationIn === null ||
+      organizerNameIn === null ||
+      contactEmailIn === null ||
+      contactPhoneNumberIn === null ||
+      descriptionIn === null
+    ) {
+      return res.send({
+        status: "failure",
+        message: "missingParameters",
+        parameterPresenceCheckDetails: {
+          title: titleIn !== null,
+          startDateTime: startDateTimeIn !== null,
+          endDateTime: endDateTimeIn !== null,
+          location: locationIn !== null,
+          organizerName: organizerNameIn !== null,
+          contactEmail: contactEmailIn !== null,
+          contactPhoneNumber: contactPhoneNumberIn !== null,
+          description: descriptionIn !== null,
+        },
+      });
+    }
+    //Validate inputs
+    const validationCheckDetails = {
+      titleIn: validation.validateLongName(titleIn),
+      startDateTimeIn: validation.validateDateTime(startDateTimeIn),
+      endDateTimeIn: validation.validateDateTime(endDateTimeIn),
+      locationIn: validation.validateLongName(locationIn),
+      organizerNameIn: validation.validateMediumName(organizerNameIn),
+      contactEmailIn: validation.validateEmail(contactEmailIn),
+      contactPhoneNumberIn:
+        validation.validateInternationalPhoneNumber(contactPhoneNumberIn),
+      descriptionIn: validation.validateShortDescription(descriptionIn),
+    };
+    if (
+      !(
+        validationCheckDetails.titleIn &&
+        validationCheckDetails.startDateTimeIn &&
+        validationCheckDetails.endDateTimeIn &&
+        validationCheckDetails.locationIn &&
+        validationCheckDetails.organizerNameIn &&
+        validationCheckDetails.contactEmailIn &&
+        validationCheckDetails.contactPhoneNumberIn &&
+        validationCheckDetails.descriptionIn
+      )
+    ) {
+      return res.send({
+        status: "failure",
+        reason: "invalidInputFormat",
+        validationCheckDetails: validationCheckDetails,
+      });
+    }
+
+    //Presence check + validation check for enteredEventID
+    const validID = validation.validateID(enteredEventID);
+
+    if (!validID) {
+      return res.send({
+        status: "failure",
+        reason: "Invalid ID format",
+      });
+    }
+
+    const dbResult = await tbl_events.getEventInformation(enteredEventID);
+    if (dbResult === undefined) {
+      return res.send({
+        status: "failure",
+        reason: "This event does not exist",
+      });
+    }
+
+    // Check if event belongs to user
+    const userID = req.session.user.userID;
+    if (dbResult.user_id !== userID) {
+      return res.send({
+        status: "failure",
+        reason: "You do not own this event",
+      });
+    }
+
+    // Edit the event in the database
+    const dbResult2 = await tbl_events.editEvent(
+      enteredEventID,
+      titleIn,
+      startDateTimeIn,
+      endDateTimeIn,
+      locationIn,
+      organizerNameIn,
+      contactEmailIn,
+      contactPhoneNumberIn,
+      descriptionIn
+    );
+
+    return res.send({
+      status: "success",
+      message: "Event successfully edited",
+    });
+  } catch (error) {
+    return res.send({
+      status: "error",
+    });
+  }
+});
+
+router.route("/ownsEvent").post(async (req, res) => {
+  try {
+    //Check if the user is logged in
+    if (!req.session.user) {
+      return res.send({
+        status: "failure",
+        reason: "notLoggedIn",
+      });
+    }
+
+    const eventID = req.body.eventID;
+    const userID = req.session.user.userID;
+
+    const dbResult = await tbl_events.getEventInformation(eventID);
+    if (dbResult === undefined) {
+      return res.send({
+        status: "failure",
+        reason: "This event does not exist",
+      });
+    }
+
+    //Presence check + validation check for enteredEventID
+    const validID = validation.validateID(eventID);
+
+    if (!validID) {
+      return res.send({
+        status: "failure",
+        reason: "Invalid ID format",
+      });
+    }
+
+    if (dbResult.user_id !== userID) {
+      return res.send({
+        status: "success",
+        owned: false,
+      });
+    } else {
+      return res.send({
+        status: "success",
+        owned: true,
+      });
+    }
+  } catch (error) {
+    console.log(error);
+    return res.send({
+      status: "error",
+    });
+  }
+});
+
 module.exports = router;
