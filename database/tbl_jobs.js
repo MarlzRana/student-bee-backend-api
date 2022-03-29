@@ -1,5 +1,5 @@
-const mysql2 = require("mysql2/promise");
-const fs = require("fs");
+const mysql2 = require('mysql2/promise');
+const fs = require('fs');
 
 //Environmental variables
 const DBHOSTSERVERADDRESS = process.env.DBHOSTSERVERADDRESS;
@@ -38,7 +38,7 @@ async function addNewRecord(
   return new Promise(async (resolve, reject) => {
     try {
       const [dbResult] = await db.query(
-        "CALL rt_add_new_record_tbl_jobs(?,?,?,?,?,?,?,?,?,?, @jobs_id_used_out); SELECT @jobs_id_used_out;",
+        'CALL rt_add_new_record_tbl_jobs(?,?,?,?,?,?,?,?,?,?, @jobs_id_used_out); SELECT @jobs_id_used_out;',
         [
           jobTitleIn,
           wageIn,
@@ -53,10 +53,10 @@ async function addNewRecord(
         ]
       );
 
-      return resolve(dbResult[1][0]["@jobs_id_used_out"]);
+      return resolve(dbResult[1][0]['@jobs_id_used_out']);
     } catch (err) {
       resolve(false);
-      throw "\nThere was an error when adding a new record to tbl_jobs\n";
+      throw '\nThere was an error when adding a new record to tbl_jobs\n';
     }
   });
 }
@@ -64,11 +64,11 @@ async function addNewRecord(
 async function get8RandomJobs() {
   return new Promise(async (resolve, reject) => {
     try {
-      const [dbResult] = await db.query("CALL rt_select_8_records_tbl_jobs();");
+      const [dbResult] = await db.query('CALL rt_select_8_records_tbl_jobs();');
       return resolve(dbResult[0]);
     } catch (err) {
       resolve(false);
-      throw "\nThere was an error when getting 8 records to tbl_jobs\n";
+      throw '\nThere was an error when getting 8 records to tbl_jobs\n';
     }
   });
 }
@@ -76,13 +76,13 @@ async function get8RandomJobs() {
 async function getJobInformation(jobIDIn) {
   return new Promise(async (resolve, reject) => {
     try {
-      const [dbResult] = await db.query("CALL rt_select_record_tbl_jobs(?);", [
+      const [dbResult] = await db.query('CALL rt_select_record_tbl_jobs(?);', [
         jobIDIn,
       ]);
       return resolve(dbResult[0][0]);
     } catch (err) {
       resolve(false);
-      throw "\nThere was an error when getting event information from tbl_jobs\n";
+      throw '\nThere was an error when getting event information from tbl_jobs\n';
     }
   });
 }
@@ -102,7 +102,7 @@ async function editJob(
   return new Promise(async (resolve, reject) => {
     try {
       const [dbResult] = await db.query(
-        "CALL rt_edit_record_tbl_jobs(?,?,?,?,?,?,?,?,?,?)",
+        'CALL rt_edit_record_tbl_jobs(?,?,?,?,?,?,?,?,?,?)',
         [
           jobIDIn,
           jobTitleIn,
@@ -121,14 +121,30 @@ async function editJob(
     } catch (err) {
       console.log(err);
       resolve(false);
-      throw "\nThere was an error when editing a record from tbl_jobs";
+      throw '\nThere was an error when editing a record from tbl_jobs';
     }
   });
 }
 
+async function findRecordsByJobTitle(jobTitleIn) {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const [dbResult] = await db.query(
+        'CALL rt_find_records_by_job_title_tbl_jobs(?);',
+        [jobTitleIn]
+      );
+      return resolve(dbResult[0]);
+    } catch (err) {
+      console.log(err);
+      resolve(false);
+      throw '\nThere was an error when finding records by job title from tbl_jobs\n';
+    }
+  });
+}
 module.exports = {
   addNewRecord: addNewRecord,
   get8RandomJobs: get8RandomJobs,
   getJobInformation: getJobInformation,
   editJob: editJob,
+  findRecordsByJobTitle: findRecordsByJobTitle,
 };
