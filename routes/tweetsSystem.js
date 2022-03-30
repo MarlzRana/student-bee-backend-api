@@ -5,9 +5,9 @@ require("dotenv").config();
 
 //Importing local file dependencies
 const validation = require("../validation/validation");
-const tbl_user_feedback = require("../database/tbl_user_feedback");
 const tbl_user_login_information = require("../database/tbl_user_login_information");
 const tbl_tweets = require("../database/tbl_tweets");
+const tbl_likes = require("../database/tbl_likes");
 //Environmental variables
 
 //Package setup
@@ -101,9 +101,6 @@ router.route("/get20RecentTweets").get(async (req, res) => {
 
     const arrOfObjToSend = await Promise.all(
       dbResult.map(async (row) => {
-        console.log(today);
-        console.log(row["tweet_posted_datetime"]);
-        console.log();
         const usernameForParticularUserID =
           await tbl_user_login_information.getUsernameByUserID(
             row["author_user_id"]
@@ -263,6 +260,256 @@ router.route("/getTweetDetails").post(async (req, res) => {
       eventInformation: returnedInformation,
     });
   } catch (error) {
+    return res.send({
+      status: "error",
+    });
+  }
+});
+
+router.route("/likeTweet").post(async (req, res) => {
+  try {
+    //Check if the user is logged in
+    if (!req.session.user) {
+      return res.send({
+        status: "failure",
+        message: "notLoggedIn",
+      });
+    }
+
+    const userID = parseInt(req.session.user.userID);
+    const tweetID = parseInt(req.body.tweetID);
+
+    //Check that all the parameters are not null
+    if (userID === null || tweetID === null) {
+      return res.send({
+        status: "failure",
+        message: "missingParameters",
+        parameterPresenceCheckDetails: {
+          userID: userID !== null,
+          tweetID: tweetID !== null,
+        },
+      });
+    }
+    //Validate inputs
+    const validationCheckDetails = {
+      userID: validation.validateID(userID),
+      tweetID: validation.validateID(tweetID),
+    };
+    if (!(validationCheckDetails.userID && validationCheckDetails.tweetID)) {
+      return res.send({
+        status: "failure",
+        reason: "invalidInputFormat",
+        validationCheckDetails: validationCheckDetails,
+        dataIn: res.body,
+      });
+    }
+
+    // const dbResult = await tbl_likes.addNewRecord(userID, tweetID);
+    const dbResult = await tbl_likes.addNewRecord(userID, tweetID);
+
+    //Check that all the parameters are not null
+    if (userID === null || tweetID === null) {
+      return res.send({
+        status: "failure",
+        message: "missingParameters",
+        parameterPresenceCheckDetails: {
+          userID: userID !== null,
+          tweetID: tweetID !== null,
+        },
+      });
+    }
+
+    const dbResult2 = await tbl_likes.checkIfUserLikedComment(tweetID, userID);
+    console.log(dbResult2);
+    console.log(dbResult2[0].like_id);
+    const likeCount = dbResult2.length;
+
+    if (likeCount < 1) {
+      return res.send({
+        status: "success",
+        liked: false,
+      });
+    } else {
+      return res.send({
+        status: "success",
+        message: "Tweet successfully liked",
+        likeID: dbResult2[0].like_id,
+      });
+    }
+
+    //Add a like to the database
+  } catch (error) {
+    console.log(error);
+    return res.send({ status: "error" });
+  }
+});
+
+router.route("/unlikeTweet").post(async (req, res) => {
+  try {
+    //Check if the user is logged in
+    if (!req.session.user) {
+      return res.send({
+        status: "failure",
+        message: "notLoggedIn",
+      });
+    }
+
+    const likeID = parseInt(req.body.likeID);
+
+    //Check that all the parameters are not null
+    if (likeID === null) {
+      return res.send({
+        status: "failure",
+        message: "missingParameters",
+        parameterPresenceCheckDetails: {
+          likeID: likeID !== null,
+        },
+      });
+    }
+    //Validate inputs
+    const validationCheckDetails = {
+      likeID: validation.validateID(likeID),
+    };
+    if (!validationCheckDetails.likeID) {
+      return res.send({
+        status: "failure",
+        reason: "invalidInputFormat",
+        validationCheckDetails: validationCheckDetails,
+        dataIn: res.body,
+      });
+    }
+
+    const dbResult = await tbl_likes.deleteLike(likeID);
+
+    return res.send({
+      status: "success",
+      message: "Tweet successfully unliked",
+    });
+  } catch (error) {
+    console.log(error);
+    return res.send({ status: "error" });
+  }
+});
+
+router.route("/getLikeCount").post(async (req, res) => {
+  try {
+    //Check if the user is logged in
+    if (!req.session.user) {
+      return res.send({
+        status: "failure",
+        message: "notLoggedIn",
+      });
+    }
+
+    const tweetID = parseInt(req.body.tweetID);
+    console.log("Tweet ID: " + tweetID);
+    console.log("Request Body: " + req.body.tweetID);
+
+    //Check that all the parameters are not null
+    if (tweetID === null) {
+      return res.send({
+        status: "failure",
+        message: "missingParameters",
+        parameterPresenceCheckDetails: {
+          tweetID: tweetID !== null,
+        },
+      });
+    }
+    //Validate inputs
+    const validationCheckDetails = {
+      tweetID: validation.validateID(tweetID),
+    };
+    if (!validationCheckDetails.tweetID) {
+      return res.send({
+        status: "failure",
+        reason: "invalidInputFormat",
+        validationCheckDetails: validationCheckDetails,
+        route: "getLikeCount",
+        dataIn: res.body,
+      });
+    }
+
+    const dbResult = await tbl_likes.getLikeCount(tweetID);
+    const likeCount = dbResult.length;
+
+    if (likeCount < 1) {
+      return res.send({
+        status: "success",
+        message: "Like count fetched",
+        likeCount: "",
+      });
+    } else {
+      return res.send({
+        status: "success",
+        message: "Like count fetched",
+        likeCount: likeCount,
+      });
+    }
+  } catch (error) {
+    console.log(error);
+    return res.send({
+      status: "error",
+    });
+  }
+});
+
+router.route("/doesUserLikeTweet").post(async (req, res) => {
+  try {
+    //Check if the user is logged in
+    if (!req.session.user) {
+      return res.send({
+        status: "failure",
+        message: "notLoggedIn",
+      });
+    }
+
+    const tweetID = parseInt(req.body.tweetID);
+    const userID = parseInt(req.session.user.userID);
+
+    //Check that all the parameters are not null
+    if (userID === null || tweetID === null) {
+      return res.send({
+        status: "failure",
+        message: "missingParameters",
+        parameterPresenceCheckDetails: {
+          userID: userID !== null,
+          tweetID: tweetID !== null,
+        },
+      });
+    }
+    //Validate inputs
+    const validationCheckDetails = {
+      userID: validation.validateID(userID),
+      tweetID: validation.validateID(tweetID),
+    };
+    if (!(validationCheckDetails.userID && validationCheckDetails.tweetID)) {
+      return res.send({
+        status: "failure",
+        reason: "invalidInputFormat",
+        validationCheckDetails: validationCheckDetails,
+        dataIn: res.body,
+      });
+    }
+
+    const dbResult = await tbl_likes.checkIfUserLikedComment(tweetID, userID);
+    console.log(dbResult);
+    console.log(dbResult[0].like_id);
+    const likeCount = dbResult.length;
+
+    if (likeCount < 1) {
+      return res.send({
+        status: "success",
+        liked: false,
+      });
+    } else {
+      return res.send({
+        status: "success",
+        liked: true,
+        likeID: dbResult[0].like_id,
+      });
+    }
+  } catch (error) {
+    console.log(error);
     return res.send({
       status: "error",
     });
