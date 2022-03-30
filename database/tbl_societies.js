@@ -1,5 +1,5 @@
-const mysql2 = require("mysql2/promise");
-const fs = require("fs");
+const mysql2 = require('mysql2/promise');
+const fs = require('fs');
 
 //Environmental variables
 const DBHOSTSERVERADDRESS = process.env.DBHOSTSERVERADDRESS;
@@ -33,7 +33,7 @@ async function addNewRecord(
   return new Promise(async (resolve, reject) => {
     try {
       const [dbResult] = await db.query(
-        "CALL rt_add_new_record_tbl_societies(?,?,?,?,?, @events_id_used_out); SELECT @society_id_used_out;",
+        'CALL rt_add_new_record_tbl_societies(?,?,?,?,?, @events_id_used_out); SELECT @society_id_used_out;',
         [
           leaderUserIDIn,
           societyNameIn,
@@ -42,10 +42,10 @@ async function addNewRecord(
           descriptionIn,
         ]
       );
-      return resolve(dbResult[1][0]["@society_id_used_out"]);
+      return resolve(dbResult[1][0]['@society_id_used_out']);
     } catch (err) {
       resolve(false);
-      throw "\nThere was an error when adding a new record to tbl_events\n";
+      throw '\nThere was an error when adding a new record to tbl_events\n';
     }
   });
 }
@@ -54,13 +54,13 @@ async function get10RandomSocieties() {
   return new Promise(async (resolve, reject) => {
     try {
       const [dbResult] = await db.query(
-        "CALL rt_select_10_records_tbl_societies();"
+        'CALL rt_select_10_records_tbl_societies();'
       );
       return resolve(dbResult[0]);
     } catch (err) {
       console.log(err);
       resolve(false);
-      throw "\nThere was an error when getting 10 random records from tbl_societies\n";
+      throw '\nThere was an error when getting 10 random records from tbl_societies\n';
     }
   });
 }
@@ -69,13 +69,13 @@ async function getSocietyInformation(societyID) {
   return new Promise(async (resolve, reject) => {
     try {
       const [dbResult] = await db.query(
-        "CALL rt_select_record_tbl_societies(?);",
+        'CALL rt_select_record_tbl_societies(?);',
         [societyID]
       );
       return resolve(dbResult[0][0]);
     } catch (err) {
       console.log(err);
-      throw "\nThere was an error when accessing a record to tbl_societies\n";
+      throw '\nThere was an error when accessing a record to tbl_societies\n';
       resolve(false);
     }
   });
@@ -91,7 +91,7 @@ async function editSociety(
   return new Promise(async (resolve, reject) => {
     try {
       const [dbResult] = await db.query(
-        "CALL rt_edit_record_tbl_societies(?,?,?,?,?)",
+        'CALL rt_edit_record_tbl_societies(?,?,?,?,?)',
         [societyIDIn, nameIn, leaderNameIn, mainSocialLinkIn, descriptionIn]
       );
       console.log(dbResult);
@@ -99,7 +99,7 @@ async function editSociety(
     } catch (err) {
       console.log(err);
       resolve(false);
-      throw "\nThere was an error when editing a record from tbl_user_login_information";
+      throw '\nThere was an error when editing a record from tbl_societies';
     }
   });
 }
@@ -121,10 +121,27 @@ async function deleteSociety(societyIDIn) {
   });
 }
 
+async function findRecordsByName(nameIn) {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const [dbResult] = await db.query(
+        'CALL rt_find_records_by_name_tbl_societies(?);',
+        [nameIn]
+      );
+      return resolve(dbResult[0]);
+    } catch (err) {
+      console.log(err);
+      resolve(false);
+      throw '\nThere was an error when finding records by title from tbl_societies\n';
+    }
+  });
+}
+
 module.exports = {
   addNewRecord: addNewRecord,
   get10RandomSocieties: get10RandomSocieties,
   getSocietyInformation: getSocietyInformation,
   editSociety: editSociety,
   deleteSociety: deleteSociety,
+  findRecordsByName: findRecordsByName,
 };

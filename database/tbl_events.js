@@ -1,5 +1,5 @@
-const mysql2 = require("mysql2/promise");
-const fs = require("fs");
+const mysql2 = require('mysql2/promise');
+const fs = require('fs');
 
 //Environmental variables
 const DBHOSTSERVERADDRESS = process.env.DBHOSTSERVERADDRESS;
@@ -37,7 +37,7 @@ async function addNewRecord(
   return new Promise(async (resolve, reject) => {
     try {
       const [dbResult] = await db.query(
-        "CALL rt_add_new_record_tbl_events(?,?,?,?,?,?,?,?,?, @events_id_used_out); SELECT @events_id_used_out;",
+        'CALL rt_add_new_record_tbl_events(?,?,?,?,?,?,?,?,?, @events_id_used_out); SELECT @events_id_used_out;',
         [
           userIDIn,
           titleIn,
@@ -50,10 +50,11 @@ async function addNewRecord(
           descriptionIn,
         ]
       );
-      return resolve(dbResult[1][0]["@events_id_used_out"]);
+      return resolve(dbResult[1][0]['@events_id_used_out']);
     } catch (err) {
+      console.log(err);
       resolve(false);
-      throw "\nThere was an error when adding a new record to tbl_events\n";
+      throw '\nThere was an error when adding a new record to tbl_events\n';
     }
   });
 }
@@ -62,13 +63,13 @@ async function getTop10MostRecentEvents() {
   return new Promise(async (resolve, reject) => {
     try {
       const [dbResult] = await db.query(
-        "CALL rt_get_top_10_most_recent_events_tbl_events();"
+        'CALL rt_get_top_10_most_recent_events_tbl_events();'
       );
       return resolve(dbResult[0]);
     } catch (err) {
       console.log(err);
       resolve(false);
-      throw "\nThere was an error when adding a new record to tbl_events\n";
+      throw '\nThere was an error when adding a new record to tbl_events\n';
     }
   });
 }
@@ -77,14 +78,14 @@ async function getEventInformation(eventID) {
   return new Promise(async (resolve, reject) => {
     try {
       const [dbResult] = await db.query(
-        "CALL rt_select_record_tbl_events(?);",
+        'CALL rt_select_record_tbl_events(?);',
         [eventID]
       );
       return resolve(dbResult[0][0]);
     } catch (err) {
       console.log(err);
       resolve(false);
-      throw "\nThere was an error when adding a new record to tbl_events\n";
+      throw '\nThere was an error when adding a new record to tbl_events\n';
     }
   });
 }
@@ -103,7 +104,7 @@ async function editEvent(
   return new Promise(async (resolve, reject) => {
     try {
       const [dbResult] = await db.query(
-        "CALL rt_edit_record_tbl_events(?,?,?,?,?,?,?,?,?)",
+        'CALL rt_edit_record_tbl_events(?,?,?,?,?,?,?,?,?)',
         [
           eventIDIn,
           titleIn,
@@ -121,7 +122,23 @@ async function editEvent(
     } catch (err) {
       console.log(err);
       resolve(false);
-      throw "\nThere was an error when editing a record from tbl_user_login_information";
+      throw '\nThere was an error when editing a record from tbl_user_login_information';
+    }
+  });
+}
+
+async function findRecordsByTitle(titleIn) {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const [dbResult] = await db.query(
+        'CALL rt_find_records_by_title_tbl_events(?);',
+        [titleIn]
+      );
+      return resolve(dbResult[0]);
+    } catch (err) {
+      console.log(err);
+      resolve(false);
+      throw '\nThere was an error when finding records by title from tbl_events\n';
     }
   });
 }
@@ -148,4 +165,5 @@ module.exports = {
   getEventInformation: getEventInformation,
   editEvent: editEvent,
   deleteEvent: deleteEvent,
+  findRecordsByTitle: findRecordsByTitle,
 };

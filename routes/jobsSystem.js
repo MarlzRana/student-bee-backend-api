@@ -1,12 +1,12 @@
-"use strict";
+'use strict';
 //Imported packages
-const express = require("express");
-require("dotenv").config();
+const express = require('express');
+require('dotenv').config();
 
 //Importing local file dependencies
-const validation = require("../validation/validation");
-const tbl_jobs = require("../database/tbl_jobs");
-const tbl_user_login_information = require("../database/tbl_user_login_information");
+const validation = require('../validation/validation');
+const tbl_jobs = require('../database/tbl_jobs');
+const tbl_user_login_information = require('../database/tbl_user_login_information');
 //Environmental variables
 
 //Package setup
@@ -15,19 +15,19 @@ router.use(express.json());
 router.use(express.urlencoded({ extended: true }));
 
 //A default gateway to test if API server is accessible
-router.route("/").get((req, res) => {
+router.route('/').get((req, res) => {
   return res.send({
-    message: "Default gateway of student-bee-backend-api route:/jobsSystem",
+    message: 'Default gateway of student-bee-backend-api route:/jobsSystem',
   });
 });
 
-router.route("/addJob").post(async (req, res) => {
+router.route('/addJob').post(async (req, res) => {
   try {
     //Check if the user is logged in
     if (!req.session.user) {
       return res.send({
-        status: "failure",
-        message: "notLoggedIn",
+        status: 'failure',
+        message: 'notLoggedIn',
       });
     }
     //Get the parameters provided in the response
@@ -55,8 +55,8 @@ router.route("/addJob").post(async (req, res) => {
       applicationLinkIn === null
     ) {
       return res.send({
-        status: "failure",
-        message: "missingParameters",
+        status: 'failure',
+        message: 'missingParameters',
         parameterPresenceCheckDetails: {
           jobName: jobNameIn !== null,
           wage: wageIn !== null,
@@ -101,8 +101,8 @@ router.route("/addJob").post(async (req, res) => {
       )
     ) {
       return res.send({
-        status: "failure",
-        reason: "invalidInputFormat",
+        status: 'failure',
+        reason: 'invalidInputFormat',
         validationCheckDetails: validationCheckDetails,
       });
     }
@@ -121,24 +121,24 @@ router.route("/addJob").post(async (req, res) => {
       applicationLinkIn
     );
     return res.send({
-      status: "success",
-      message: "eventAdded",
+      status: 'success',
+      message: 'eventAdded',
     });
   } catch (err) {
     return res.send({
-      status: "failure",
-      reason: "internalError",
+      status: 'failure',
+      reason: 'internalError',
     });
   }
 });
 
-router.route("/8RandomJobs").get(async (req, res) => {
+router.route('/8RandomJobs').get(async (req, res) => {
   try {
     //Check if the user is logged in
     if (!req.session.user) {
       return res.send({
-        status: "failure",
-        reason: "notLoggedIn",
+        status: 'failure',
+        reason: 'notLoggedIn',
       });
     }
 
@@ -147,41 +147,41 @@ router.route("/8RandomJobs").get(async (req, res) => {
     const arrOfObjToSend = await Promise.all(
       dbResult.map(async (row) => {
         return {
-          jobID: row["job_id"],
-          employerUserID: row["employer_user_id"],
-          jobTitle: row["job_title"],
-          location: row["location"],
+          jobID: row['job_id'],
+          employerUserID: row['employer_user_id'],
+          jobTitle: row['job_title'],
+          location: row['location'],
           startDate:
-            row["start_date"].getUTCDate() +
-            "/" +
-            (row["start_date"].getUTCMonth() + 1) +
-            "/" +
-            row["start_date"].getUTCFullYear(),
-          description: row["description"],
-          employerContactEmail: row["contact_email"],
-          employerContactPhoneNumber: row["contact_phone_number"],
-          wage: row["wage"],
-          link: row["link"],
-          workingHours: row["working_hours"],
+            row['start_date'].getUTCDate() +
+            '/' +
+            (row['start_date'].getUTCMonth() + 1) +
+            '/' +
+            row['start_date'].getUTCFullYear(),
+          description: row['description'],
+          employerContactEmail: row['contact_email'],
+          employerContactPhoneNumber: row['contact_phone_number'],
+          wage: row['wage'],
+          link: row['link'],
+          workingHours: row['working_hours'],
         };
       })
     );
     return res.send({ events: arrOfObjToSend });
   } catch (err) {
     return res.send({
-      status: "failure",
-      reason: "internalError",
+      status: 'failure',
+      reason: 'internalError',
     });
   }
 });
 
-router.route("/getJobDetails").post(async (req, res) => {
+router.route('/getJobDetails').post(async (req, res) => {
   try {
     //Check if the user is logged in
     if (!req.session.user) {
       return res.send({
-        status: "failure",
-        reason: "notLoggedIn",
+        status: 'failure',
+        reason: 'notLoggedIn',
       });
     }
 
@@ -192,8 +192,8 @@ router.route("/getJobDetails").post(async (req, res) => {
 
     if (!validID) {
       return res.send({
-        status: "failure",
-        reason: "Invalid ID format",
+        status: 'failure',
+        reason: 'Invalid ID format',
         enteredID: enteredJobID,
         enteredBody: req.body,
       });
@@ -202,8 +202,8 @@ router.route("/getJobDetails").post(async (req, res) => {
     const dbResult = await tbl_jobs.getJobInformation(enteredJobID);
     if (dbResult === undefined) {
       return res.send({
-        status: "failure",
-        reason: "This event does not exist",
+        status: 'failure',
+        reason: 'This event does not exist',
       });
     }
 
@@ -214,9 +214,9 @@ router.route("/getJobDetails").post(async (req, res) => {
       location: dbResult.location,
       startDate:
         dbResult.start_date.getUTCDate() +
-        "/" +
+        '/' +
         (dbResult.start_date.getUTCMonth() + 1) +
-        "/" +
+        '/' +
         dbResult.start_date.getUTCFullYear(),
       description: dbResult.description,
       employerContactEmail: dbResult.contact_email,
@@ -227,23 +227,23 @@ router.route("/getJobDetails").post(async (req, res) => {
     };
 
     return res.send({
-      status: "success",
+      status: 'success',
       jobInformation: returnedInformation,
     });
   } catch (error) {
     return res.send({
-      status: "error",
+      status: 'error',
     });
   }
 });
 
-router.route("/editJobDetails").post(async (req, res) => {
+router.route('/editJobDetails').post(async (req, res) => {
   try {
     //Check if the user is logged in
     if (!req.session.user) {
       return res.send({
-        status: "failure",
-        message: "notLoggedIn",
+        status: 'failure',
+        message: 'notLoggedIn',
       });
     }
     //Get the parameters provided in the response
@@ -269,8 +269,8 @@ router.route("/editJobDetails").post(async (req, res) => {
       applicationLinkIn === null
     ) {
       return res.send({
-        status: "failure",
-        message: "missingParameters",
+        status: 'failure',
+        message: 'missingParameters',
         parameterPresenceCheckDetails: {
           jobName: jobNameIn !== null,
           wage: wageIn !== null,
@@ -312,8 +312,8 @@ router.route("/editJobDetails").post(async (req, res) => {
       )
     ) {
       return res.send({
-        status: "failure",
-        reason: "invalidInputFormat",
+        status: 'failure',
+        reason: 'invalidInputFormat',
         validationCheckDetails: validationCheckDetails,
       });
     }
@@ -324,16 +324,16 @@ router.route("/editJobDetails").post(async (req, res) => {
 
     if (!validID) {
       return res.send({
-        status: "failure",
-        reason: "Invalid ID format",
+        status: 'failure',
+        reason: 'Invalid ID format',
       });
     }
 
     const dbResult = await tbl_jobs.getJobInformation(jobID);
     if (dbResult === undefined) {
       return res.send({
-        status: "failure",
-        reason: "This society does not exist",
+        status: 'failure',
+        reason: 'This society does not exist',
       });
     }
 
@@ -341,8 +341,8 @@ router.route("/editJobDetails").post(async (req, res) => {
     const userID = req.session.user.userID;
     if (dbResult.employer_user_id !== userID) {
       return res.send({
-        status: "failure",
-        reason: "You do not own this job",
+        status: 'failure',
+        reason: 'You do not own this job',
       });
     }
 
@@ -361,24 +361,24 @@ router.route("/editJobDetails").post(async (req, res) => {
     );
 
     return res.send({
-      status: "success",
-      message: "Job successfully edited",
+      status: 'success',
+      message: 'Job successfully edited',
     });
   } catch (error) {
     console.log(error);
     return res.send({
-      status: "error",
+      status: 'error',
     });
   }
 });
 
-router.route("/ownsJob").post(async (req, res) => {
+router.route('/ownsJob').post(async (req, res) => {
   try {
     //Check if the user is logged in
     if (!req.session.user) {
       return res.send({
-        status: "failure",
-        reason: "notLoggedIn",
+        status: 'failure',
+        reason: 'notLoggedIn',
       });
     }
 
@@ -388,8 +388,8 @@ router.route("/ownsJob").post(async (req, res) => {
     const dbResult = await tbl_jobs.getJobInformation(jobID);
     if (dbResult === undefined) {
       return res.send({
-        status: "failure",
-        reason: "This society does not exist",
+        status: 'failure',
+        reason: 'This society does not exist',
       });
     }
 
@@ -398,26 +398,100 @@ router.route("/ownsJob").post(async (req, res) => {
 
     if (!validID) {
       return res.send({
-        status: "failure",
-        reason: "Invalid ID format",
+        status: 'failure',
+        reason: 'Invalid ID format',
       });
     }
 
     if (dbResult.employer_user_id !== userID) {
       return res.send({
-        status: "success",
+        status: 'success',
         owned: false,
       });
     } else {
       return res.send({
-        status: "success",
+        status: 'success',
         owned: true,
       });
     }
   } catch (error) {
     console.log(error);
     return res.send({
-      status: "error",
+      status: 'error',
+    });
+  }
+});
+
+router.route('/search').post(async (req, res) => {
+  try {
+    //Check if the user is logged in
+    if (!req.session.user) {
+      return res.send({
+        status: 'failure',
+        reason: 'notLoggedIn',
+      });
+    }
+    //Get the parameter
+    const query = req.body.query;
+    //Performing a presence check
+    const parameterPresenceCheckDetails = {
+      query: query !== null && query !== undefined,
+    };
+    if (
+      !Object.keys(parameterPresenceCheckDetails).every(
+        (key) => parameterPresenceCheckDetails[key]
+      )
+    ) {
+      return res.send({
+        status: 'failure',
+        message: 'missingParameters',
+        parameterPresenceCheckDetails: parameterPresenceCheckDetails,
+      });
+    }
+    //Validating the query string
+    const validationCheckDetails = {
+      query: validation.validateLongName(query),
+    };
+    if (
+      !Object.keys(validationCheckDetails).every((key) => {
+        return validationCheckDetails[key];
+      })
+    ) {
+      return res.send({
+        status: 'failure',
+        reason: 'invalidInputFormat',
+        validationCheckDetails: validationCheckDetails,
+      });
+    }
+    //Searching for an event with a name that begins with query
+    const dbResult = await tbl_jobs.findRecordsByJobTitle(query);
+    return res.send(
+      dbResult.map((obj) => {
+        return {
+          jobID: obj.job_id,
+          employerUserID: obj.employer_user_id,
+          jobTitle: obj.job_title,
+          location: obj.location,
+          startDate:
+            obj.start_date.getUTCDate() +
+            '/' +
+            (obj.start_date.getUTCMonth() + 1) +
+            '/' +
+            obj.start_date.getUTCFullYear(),
+          description: obj.description,
+          employerContactEmail: obj.contact_email,
+          employerContactPhoneNumber: obj.contact_phone_number,
+          wage: obj.wage,
+          applicationLink: obj.link,
+          workingHours: obj.working_hours,
+        };
+      })
+    );
+  } catch (err) {
+    console.log(err);
+    return res.send({
+      status: 'failure',
+      reason: 'internalError',
     });
   }
 });
