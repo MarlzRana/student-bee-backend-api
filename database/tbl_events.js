@@ -143,10 +143,27 @@ async function findRecordsByTitle(titleIn) {
   });
 }
 
+async function deleteEvent(eventIDIn) {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const [dbResult] = await db.query("CALL rt_delete_record_tbl_events(?)", [
+        eventIDIn,
+      ]);
+      console.log(dbResult);
+      return resolve(true);
+    } catch (err) {
+      console.log(err);
+      resolve(false);
+      throw "\nThere was an error when deleting a record from tbl_events";
+    }
+  });
+}
+
 module.exports = {
   addNewRecord: addNewRecord,
   getTop10MostRecentEvents: getTop10MostRecentEvents,
   getEventInformation: getEventInformation,
   editEvent: editEvent,
+  deleteEvent: deleteEvent,
   findRecordsByTitle: findRecordsByTitle,
 };
