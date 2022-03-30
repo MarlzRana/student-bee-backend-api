@@ -586,7 +586,10 @@ router.route('/invertIsUserPartOfEvent').post(async (req, res) => {
       );
     //If the user is already part of the event remove their participation
     if (dbResult) {
-      tbl_event_participators.deleteRecordByUserIDAndEventID(userID, eventID);
+      await tbl_event_participators.deleteRecordByUserIDAndEventID(
+        userID,
+        eventID
+      );
       //Send a response letting the API user know that the user was removed as a participant of that event
       return res.send({
         status: 'success',
@@ -594,7 +597,7 @@ router.route('/invertIsUserPartOfEvent').post(async (req, res) => {
       });
     }
     //Else add them as a participant of the event
-    tbl_event_participators.addRecord(userID, eventID);
+    await tbl_event_participators.addRecord(userID, eventID);
     //Send a response letting the API user know that the user was added as a participant of that event
     return res.send({
       status: 'success',

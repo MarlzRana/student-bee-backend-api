@@ -7,6 +7,7 @@ require('dotenv').config();
 //Importing local file dependencies
 const validation = require('../validation/validation');
 const tbl_societies = require('../database/tbl_societies');
+const tbl_society_participators = require('../database/tbl_society_participators');
 const tbl_user_login_information = require('../database/tbl_user_login_information');
 //Environmental variables
 
@@ -389,7 +390,7 @@ router.route('/search').post(async (req, res) => {
         validationCheckDetails: validationCheckDetails,
       });
     }
-    //Searching for an event with a name that begins with query
+    //Searching for an society with a name that begins with query
     const dbResult = await tbl_societies.findRecordsByName(query);
     return res.send(
       dbResult.map((obj) => {
@@ -412,11 +413,160 @@ router.route('/search').post(async (req, res) => {
   }
 });
 
-router.route("/deleteSociety").post(async (req, res) => {
+router.route('/isUserPartOfSociety').post(async (req, res) => {
   try {
     //Check if the user is logged in
     if (!req.session.user) {
       return res.send({
+        status: 'failure',
+        reason: 'notLoggedIn',
+      });
+    }
+    //Getting the societyID of the society the user is checking they are part of
+    const societyID = req.body.societyID;
+    //Getting their userID from the session
+    const userID = req.session.user.userID;
+    //Presence checking our parameter
+    const parameterPresenceCheckDetails = {
+      societyID: societyID !== null && societyID !== undefined,
+    };
+    if (
+      !Object.keys(parameterPresenceCheckDetails).every(
+        (key) => parameterPresenceCheckDetails[key]
+      )
+    ) {
+      return res.send({
+        status: 'failure',
+        message: 'missingParameters',
+        parameterPresenceCheckDetails: parameterPresenceCheckDetails,
+      });
+    }
+    //Validating the format of our parameters
+    const validationCheckDetails = {
+      societyID: validation.validateID(societyID),
+    };
+    if (
+      !Object.keys(validationCheckDetails).every((key) => {
+        return validationCheckDetails[key];
+      })
+    ) {
+      return res.send({
+        status: 'failure',
+        reason: 'invalidInputFormat',
+        validationCheckDetails: validationCheckDetails,
+      });
+    }
+    //Checking if the user has already said they are part of the society
+    //DB query checking if the user is part of the society
+    const dbResult =
+      await tbl_society_participators.selectRecordByUserIDAndSocietyID(
+        userID,
+        societyID
+      );
+    //If the user is already part of the society return true
+    if (dbResult) {
+      return res.send({
+        status: 'success',
+        reason: { userIsPartOfSociety: true },
+      });
+    }
+    //Else return false
+    return res.send({
+      status: 'success',
+      reason: { userIsPartOfSociety: false },
+    });
+  } catch (err) {
+    console.log(err);
+    return res.send({
+      status: 'failure',
+      reason: 'internalError',
+    });
+  }
+});
+
+router.route('/invertIsUserPartOfSociety').post(async (req, res) => {
+  try {
+    //Check if the user is logged in
+    if (!req.session.user) {
+      return res.send({
+        status: 'failure',
+        reason: 'notLoggedIn',
+      });
+    }
+    //Getting the societyID of the society the user is trying to invert their part of status on
+    const societyID = req.body.societyID;
+    //Getting their userID from the session
+    const userID = req.session.user.userID;
+    //Presence checking our parameter
+    const parameterPresenceCheckDetails = {
+      societyID: societyID !== null && societyID !== undefined,
+    };
+    if (
+      !Object.keys(parameterPresenceCheckDetails).every(
+        (key) => parameterPresenceCheckDetails[key]
+      )
+    ) {
+      return res.send({
+        status: 'failure',
+        message: 'missingParameters',
+        parameterPresenceCheckDetails: parameterPresenceCheckDetails,
+      });
+    }
+    //Validating the format of our parameters
+    const validationCheckDetails = {
+      societyID: validation.validateID(societyID),
+    };
+    if (
+      !Object.keys(validationCheckDetails).every((key) => {
+        return validationCheckDetails[key];
+      })
+    ) {
+      return res.send({
+        status: 'failure',
+        reason: 'invalidInputFormat',
+        validationCheckDetails: validationCheckDetails,
+      });
+    }
+    //Check if the user is currently part of the society
+    //DB query checking if the user is part of the society
+    const dbResult =
+      await tbl_society_participators.selectRecordByUserIDAndSocietyID(
+        userID,
+        societyID
+      );
+    //If the user is already part of the society remove their participation
+    if (dbResult) {
+      await tbl_society_participators.deleteRecordByUserIDAndSocietyID(
+        userID,
+        societyID
+      );
+      //Send a response letting the API user know that the user was removed as a participant of that society
+      return res.send({
+        status: 'success',
+        reason: 'userParticipationDeleted',
+      });
+    }
+    //Else add them as a participant of the society
+    await tbl_society_participators.addRecord(userID, societyID);
+    //Send a response letting the API user know that the user was added as a participant of that society
+    return res.send({
+      status: 'success',
+      reason: 'userParticipationAdded',
+    });
+  } catch (err) {
+    console.log(err);
+    return res.send({
+      status: 'failure',
+      reason: 'internalError',
+    });
+  }
+});
+
+router.route("/deleteSociety").post(async (req, res) => {
+  try {
+    //Check if the user is logged in
+    if (!req.session.user) {
+      return res.send({  
         status: "failure",
         reason: "notLoggedIn",
       });
