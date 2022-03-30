@@ -358,14 +358,6 @@ router.route('/ownsEvent').post(async (req, res) => {
     const eventID = req.body.eventID;
     const userID = req.session.user.userID;
 
-    const dbResult = await tbl_events.getEventInformation(eventID);
-    if (dbResult === undefined) {
-      return res.send({
-        status: 'failure',
-        reason: 'This event does not exist',
-      });
-    }
-
     //Presence check + validation check for enteredEventID
     const validID = validation.validateID(eventID);
 
@@ -373,6 +365,14 @@ router.route('/ownsEvent').post(async (req, res) => {
       return res.send({
         status: 'failure',
         reason: 'Invalid ID format',
+      });
+    }
+
+    const dbResult = await tbl_events.getEventInformation(eventID);
+    if (dbResult === undefined) {
+      return res.send({
+        status: "failure",
+        reason: "This event does not exist",
       });
     }
 
@@ -609,6 +609,55 @@ router.route('/invertIsUserPartOfEvent').post(async (req, res) => {
       status: 'failure',
       reason: 'internalError',
     });
+  }
+});
+
+router.route("/deleteEvent").post(async (req, res) => {
+  try {
+    //Check if the user is logged in
+    if (!req.session.user) {
+      return res.send({
+        status: "failure",
+        reason: "notLoggedIn",
+      });
+    }
+
+    const eventID = req.body.eventID;
+    const userID = req.session.user.userID;
+
+    const validID = validation.validateID(eventID);
+
+    //Validate ID
+    if (!validID) {
+      return res.send({
+        status: "failure",
+        reason: "Invalid ID format",
+      });
+    }
+
+    //Check if event exists
+    const dbResult = await tbl_events.getEventInformation(eventID);
+    if (dbResult === undefined) {
+      return res.send({
+        status: "failure",
+        reason: "This event does not exist",
+      });
+    }
+
+    //Check if user owns event
+    if (dbResult.user_id !== userID) {
+      return res.send({
+        status: "failure",
+        owned: false,
+      });
+    }
+
+    //Delete if they do
+    const dbResult2 = await tbl_events.deleteEvent(eventID);
+
+    return res.send({ status: "success" });
+  } catch (error) {
+    return res.send({ status: "error" });
   }
 });
 

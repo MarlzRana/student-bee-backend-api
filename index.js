@@ -48,6 +48,7 @@ const eventsSystem = require("./routes/eventsSystem");
 const societiesSystem = require("./routes/societiesSystem");
 const jobsSystem = require("./routes/jobsSystem");
 const userFeedbackSystem = require("./routes/feedbackSystem");
+const tweetSystem = require("./routes/tweetsSystem");
 
 //Configuring our routes as "middleware"
 app.use("/loginSystem", loginSystem);
@@ -55,6 +56,7 @@ app.use("/eventsSystem", eventsSystem);
 app.use("/societiesSystem", societiesSystem);
 app.use("/jobsSystem", jobsSystem);
 app.use("/feedbackSystem", userFeedbackSystem);
+app.use("/tweetsSystem", tweetSystem);
 
 //Setting up the database connection
 const dbConfig = {
