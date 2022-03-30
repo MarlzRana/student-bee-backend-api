@@ -63,6 +63,7 @@ router.route("/addTweet").post(async (req, res) => {
         status: "failure",
         reason: "invalidInputFormat",
         validationCheckDetails: validationCheckDetails,
+        dataIn: res.body,
       });
     }
 
@@ -131,6 +132,13 @@ router.route("/get20RecentTweets").get(async (req, res) => {
                 authorUsername: usernameForParticularUserID,
                 howLongAgo: howLongAgoMinutes + " minute ago",
               };
+            } else if (howLongAgoMinutes < 1) {
+              return {
+                tweetID: row["tweet_id"],
+                content: row["content"],
+                authorUsername: usernameForParticularUserID,
+                howLongAgo: "Just now",
+              };
             } else {
               return {
                 tweetID: row["tweet_id"],
@@ -154,6 +162,13 @@ router.route("/get20RecentTweets").get(async (req, res) => {
                   content: row["content"],
                   authorUsername: usernameForParticularUserID,
                   howLongAgo: howLongAgoMinutes + " minute ago",
+                };
+              } else if (howLongAgoMinutes < 1) {
+                return {
+                  tweetID: row["tweet_id"],
+                  content: row["content"],
+                  authorUsername: usernameForParticularUserID,
+                  howLongAgo: "Just now",
                 };
               } else {
                 return {
