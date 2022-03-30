@@ -6,6 +6,7 @@ require('dotenv').config();
 //Importing local file dependencies
 const validation = require('../validation/validation');
 const tbl_events = require('../database/tbl_events');
+const tbl_event_participators = require('../database/tbl_event_participators');
 const tbl_user_login_information = require('../database/tbl_user_login_information');
 //Environmental variables
 
@@ -453,6 +454,152 @@ router.route('/search').post(async (req, res) => {
         };
       })
     );
+  } catch (err) {
+    console.log(err);
+    return res.send({
+      status: 'failure',
+      reason: 'internalError',
+    });
+  }
+});
+
+router.route('/isUserPartOfEvent').post(async (req, res) => {
+  try {
+    //Check if the user is logged in
+    if (!req.session.user) {
+      return res.send({
+        status: 'failure',
+        reason: 'notLoggedIn',
+      });
+    }
+    //Getting the eventID of the event the user is checking they are part of
+    const eventID = req.body.eventID;
+    //Getting their userID from the session
+    const userID = req.session.user.userID;
+    //Presence checking our parameter
+    const parameterPresenceCheckDetails = {
+      eventID: eventID !== null && eventID !== undefined,
+    };
+    if (
+      !Object.keys(parameterPresenceCheckDetails).every(
+        (key) => parameterPresenceCheckDetails[key]
+      )
+    ) {
+      return res.send({
+        status: 'failure',
+        message: 'missingParameters',
+        parameterPresenceCheckDetails: parameterPresenceCheckDetails,
+      });
+    }
+    //Validating the format of our parameters
+    const validationCheckDetails = {
+      eventID: validation.validateID(eventID),
+    };
+    if (
+      !Object.keys(validationCheckDetails).every((key) => {
+        return validationCheckDetails[key];
+      })
+    ) {
+      return res.send({
+        status: 'failure',
+        reason: 'invalidInputFormat',
+        validationCheckDetails: validationCheckDetails,
+      });
+    }
+    //Checking if the user has already said they are part of the event
+    //DB query checking if the user is part of the event
+    const dbResult =
+      await tbl_event_participators.selectRecordByUserIDAndEventID(
+        userID,
+        eventID
+      );
+    //If the user is already part of the event return true
+    if (dbResult) {
+      return res.send({
+        status: 'success',
+        reason: { userIsPartOfEvent: true },
+      });
+    }
+    //Else return false
+    return res.send({
+      status: 'success',
+      reason: { userIsPartOfEvent: false },
+    });
+  } catch (err) {
+    console.log(err);
+    return res.send({
+      status: 'failure',
+      reason: 'internalError',
+    });
+  }
+});
+
+router.route('/invertIsUserPartOfEvent').post(async (req, res) => {
+  try {
+    //Check if the user is logged in
+    if (!req.session.user) {
+      return res.send({
+        status: 'failure',
+        reason: 'notLoggedIn',
+      });
+    }
+    //Getting the eventID of the event the user is trying to invert their part of status on
+    const eventID = req.body.eventID;
+    //Getting their userID from the session
+    const userID = req.session.user.userID;
+    //Presence checking our parameter
+    const parameterPresenceCheckDetails = {
+      eventID: eventID !== null && eventID !== undefined,
+    };
+    if (
+      !Object.keys(parameterPresenceCheckDetails).every(
+        (key) => parameterPresenceCheckDetails[key]
+      )
+    ) {
+      return res.send({
+        status: 'failure',
+        message: 'missingParameters',
+        parameterPresenceCheckDetails: parameterPresenceCheckDetails,
+      });
+    }
+    //Validating the format of our parameters
+    const validationCheckDetails = {
+      eventID: validation.validateID(eventID),
+    };
+    if (
+      !Object.keys(validationCheckDetails).every((key) => {
+        return validationCheckDetails[key];
+      })
+    ) {
+      return res.send({
+        status: 'failure',
+        reason: 'invalidInputFormat',
+        validationCheckDetails: validationCheckDetails,
+      });
+    }
+    //Check if the user is currently part of the event
+    //DB query checking if the user is part of the event
+    const dbResult =
+      await tbl_event_participators.selectRecordByUserIDAndEventID(
+        userID,
+        eventID
+      );
+    //If the user is already part of the event remove their participation
+    if (dbResult) {
+      tbl_event_participators.deleteRecordByUserIDAndEventID(userID, eventID);
+      //Send a response letting the API user know that the user was removed as a participant of that event
+      return res.send({
+        status: 'success',
+        reason: 'userParticipationDeleted',
+      });
+    }
+    //Else add them as a participant of the event
+    tbl_event_participators.addRecord(userID, eventID);
+    //Send a response letting the API user know that the user was added as a participant of that event
+    return res.send({
+      status: 'success',
+      reason: 'userParticipationAdded',
+    });
   } catch (err) {
     console.log(err);
     return res.send({
