@@ -108,8 +108,6 @@ router.route("/get20RecentTweets").get(async (req, res) => {
         const howLongAgoDays = parseInt(
           Math.abs(row["tweet_posted_datetime"] - today) / (1000 * 60 * 60 * 24)
         );
-        console.log("Days ago: ");
-        console.log(howLongAgoDays);
         if (howLongAgoDays < 1) {
           const howLongAgoHours = parseInt(
             (Math.abs(row["tweet_posted_datetime"] - today) /
@@ -322,8 +320,6 @@ router.route("/likeTweet").post(async (req, res) => {
     }
 
     const dbResult2 = await tbl_likes.checkIfUserLikedComment(tweetID, userID);
-    console.log(dbResult2);
-    console.log(dbResult2[0].like_id);
     const likeCount = dbResult2.length;
 
     if (likeCount < 1) {
@@ -404,8 +400,6 @@ router.route("/getLikeCount").post(async (req, res) => {
     }
 
     const tweetID = parseInt(req.body.tweetID);
-    console.log("Tweet ID: " + tweetID);
-    console.log("Request Body: " + req.body.tweetID);
 
     //Check that all the parameters are not null
     if (tweetID === null) {
@@ -494,8 +488,6 @@ router.route("/doesUserLikeTweet").post(async (req, res) => {
     }
 
     const dbResult = await tbl_likes.checkIfUserLikedComment(tweetID, userID);
-    console.log(dbResult);
-    console.log(dbResult[0].like_id);
     const likeCount = dbResult.length;
 
     if (likeCount < 1) {

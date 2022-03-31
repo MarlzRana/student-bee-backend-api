@@ -123,18 +123,25 @@ router.route("/login").post(async (req, res) => {
       enteredPassword,
       actualHashedPassword
     );
-    //Get the userID of the particular user from the database
-    const userID = dbResult["user_id"];
-    //If the password is correct, create a session and return a cookie and a message letting the API user know that the login was successful
-    req.session.user = {
-      userID: userID,
-      username: enteredUsername,
-      password: actualHashedPassword,
-    };
-    return res.send({
-      status: "success",
-      reason: "validCredentials",
-    });
+    if (isCorrectPassword) {
+      //Get the userID of the particular user from the database
+      const userID = dbResult["user_id"];
+      //If the password is correct, create a session and return a cookie and a message letting the API user know that the login was successful
+      req.session.user = {
+        userID: userID,
+        username: enteredUsername,
+        password: actualHashedPassword,
+      };
+      return res.send({
+        status: "success",
+        reason: "validCredentials",
+      });
+    } else {
+      return res.send({
+        status: "failure",
+        reason: "invalidCredentials",
+      });
+    }
   } catch (err) {
     console.log(err);
     return res.send({ error: true });
@@ -315,7 +322,6 @@ router.route("/getPersonalInformation").post(async (req, res) => {
         reason: "This user does not exist",
       });
     }
-
     console.log(dbResult);
     const userID = dbResult.user_id;
     console.log(userID);
