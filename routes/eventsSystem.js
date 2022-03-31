@@ -1,13 +1,13 @@
-'use strict';
+"use strict";
 //Imported packages
-const express = require('express');
-require('dotenv').config();
+const express = require("express");
+require("dotenv").config();
 
 //Importing local file dependencies
-const validation = require('../validation/validation');
-const tbl_events = require('../database/tbl_events');
-const tbl_event_participators = require('../database/tbl_event_participators');
-const tbl_user_login_information = require('../database/tbl_user_login_information');
+const validation = require("../validation/validation");
+const tbl_events = require("../database/tbl_events");
+const tbl_event_participators = require("../database/tbl_event_participators");
+const tbl_user_login_information = require("../database/tbl_user_login_information");
 //Environmental variables
 
 //Package setup
@@ -16,19 +16,19 @@ router.use(express.json());
 router.use(express.urlencoded({ extended: true }));
 
 //A default gateway to test if API server is accessible
-router.route('/').get((req, res) => {
+router.route("/").get((req, res) => {
   return res.send({
-    message: 'Default gateway of student-bee-backend-api route:/eventsSystem',
+    message: "Default gateway of student-bee-backend-api route:/eventsSystem",
   });
 });
 
-router.route('/addEvent').post(async (req, res) => {
+router.route("/addEvent").post(async (req, res) => {
   try {
     //Check if the user is logged in
     if (!req.session.user) {
       return res.send({
-        status: 'failure',
-        message: 'notLoggedIn',
+        status: "failure",
+        message: "notLoggedIn",
       });
     }
     //Get the parameters provided in the response
@@ -53,8 +53,8 @@ router.route('/addEvent').post(async (req, res) => {
       descriptionIn === null
     ) {
       return res.send({
-        status: 'failure',
-        message: 'missingParameters',
+        status: "failure",
+        message: "missingParameters",
         parameterPresenceCheckDetails: {
           title: titleIn !== null,
           startDateTime: startDateTimeIn !== null,
@@ -92,8 +92,8 @@ router.route('/addEvent').post(async (req, res) => {
       )
     ) {
       return res.send({
-        status: 'failure',
-        reason: 'invalidInputFormat',
+        status: "failure",
+        reason: "invalidInputFormat",
         validationCheckDetails: validationCheckDetails,
       });
     }
@@ -110,25 +110,25 @@ router.route('/addEvent').post(async (req, res) => {
       descriptionIn
     );
     return res.send({
-      status: 'success',
-      message: 'eventAdded',
+      status: "success",
+      message: "eventAdded",
     });
   } catch (err) {
     console.log(err);
     return res.send({
-      status: 'failure',
-      reason: 'internalError',
+      status: "failure",
+      reason: "internalError",
     });
   }
 });
 
-router.route('/top10MostRecentEvents').get(async (req, res) => {
+router.route("/top10MostRecentEvents").get(async (req, res) => {
   try {
     //Check if the user is logged in
     if (!req.session.user) {
       return res.send({
-        status: 'failure',
-        reason: 'notLoggedIn',
+        status: "failure",
+        reason: "notLoggedIn",
       });
     }
 
@@ -138,18 +138,18 @@ router.route('/top10MostRecentEvents').get(async (req, res) => {
     const arrOfObjToSend = await Promise.all(
       dbResult.map(async (row) => {
         const usernameForParticularUserID =
-          await tbl_user_login_information.getUsernameByUserID(row['user_id']);
+          await tbl_user_login_information.getUsernameByUserID(row["user_id"]);
         return {
-          eventID: row['event_id'],
+          eventID: row["event_id"],
           username: usernameForParticularUserID,
-          title: row['title'],
-          startDateTime: row['start_datetime'],
-          endDateTime: row['end_datetime'],
-          location: row['location'],
-          organizerName: row['organizer_name'],
-          contactEmail: row['contact_email'],
-          contactPhoneNumber: row['contact_phone_number'],
-          description: row['description'],
+          title: row["title"],
+          startDateTime: row["start_datetime"],
+          endDateTime: row["end_datetime"],
+          location: row["location"],
+          organizerName: row["organizer_name"],
+          contactEmail: row["contact_email"],
+          contactPhoneNumber: row["contact_phone_number"],
+          description: row["description"],
         };
       })
     );
@@ -157,19 +157,19 @@ router.route('/top10MostRecentEvents').get(async (req, res) => {
   } catch (err) {
     console.log(err);
     return res.send({
-      status: 'failure',
-      reason: 'internalError',
+      status: "failure",
+      reason: "internalError",
     });
   }
 });
 
-router.route('/getEventDetails').post(async (req, res) => {
+router.route("/getEventDetails").post(async (req, res) => {
   try {
     //Check if the user is logged in
     if (!req.session.user) {
       return res.send({
-        status: 'failure',
-        reason: 'notLoggedIn',
+        status: "failure",
+        reason: "notLoggedIn",
       });
     }
 
@@ -180,16 +180,16 @@ router.route('/getEventDetails').post(async (req, res) => {
 
     if (!validID) {
       return res.send({
-        status: 'failure',
-        reason: 'Invalid ID format',
+        status: "failure",
+        reason: "Invalid ID format",
       });
     }
 
     const dbResult = await tbl_events.getEventInformation(enteredEventID);
     if (dbResult === undefined) {
       return res.send({
-        status: 'failure',
-        reason: 'This event does not exist',
+        status: "failure",
+        reason: "This event does not exist",
       });
     }
 
@@ -207,23 +207,23 @@ router.route('/getEventDetails').post(async (req, res) => {
     };
 
     return res.send({
-      status: 'success',
+      status: "success",
       eventInformation: returnedInformation,
     });
   } catch (error) {
     return res.send({
-      status: 'error',
+      status: "error",
     });
   }
 });
 
-router.route('/editEventDetails').post(async (req, res) => {
+router.route("/editEventDetails").post(async (req, res) => {
   try {
     //Check if the user is logged in
     if (!req.session.user) {
       return res.send({
-        status: 'failure',
-        reason: 'notLoggedIn',
+        status: "failure",
+        reason: "notLoggedIn",
       });
     }
 
@@ -249,8 +249,8 @@ router.route('/editEventDetails').post(async (req, res) => {
       descriptionIn === null
     ) {
       return res.send({
-        status: 'failure',
-        message: 'missingParameters',
+        status: "failure",
+        message: "missingParameters",
         parameterPresenceCheckDetails: {
           title: titleIn !== null,
           startDateTime: startDateTimeIn !== null,
@@ -288,8 +288,8 @@ router.route('/editEventDetails').post(async (req, res) => {
       )
     ) {
       return res.send({
-        status: 'failure',
-        reason: 'invalidInputFormat',
+        status: "failure",
+        reason: "invalidInputFormat",
         validationCheckDetails: validationCheckDetails,
       });
     }
@@ -299,16 +299,16 @@ router.route('/editEventDetails').post(async (req, res) => {
 
     if (!validID) {
       return res.send({
-        status: 'failure',
-        reason: 'Invalid ID format',
+        status: "failure",
+        reason: "Invalid ID format",
       });
     }
 
     const dbResult = await tbl_events.getEventInformation(enteredEventID);
     if (dbResult === undefined) {
       return res.send({
-        status: 'failure',
-        reason: 'This event does not exist',
+        status: "failure",
+        reason: "This event does not exist",
       });
     }
 
@@ -316,8 +316,8 @@ router.route('/editEventDetails').post(async (req, res) => {
     const userID = req.session.user.userID;
     if (dbResult.user_id !== userID) {
       return res.send({
-        status: 'failure',
-        reason: 'You do not own this event',
+        status: "failure",
+        reason: "You do not own this event",
       });
     }
 
@@ -335,23 +335,23 @@ router.route('/editEventDetails').post(async (req, res) => {
     );
 
     return res.send({
-      status: 'success',
-      message: 'Event successfully edited',
+      status: "success",
+      message: "Event successfully edited",
     });
   } catch (error) {
     return res.send({
-      status: 'error',
+      status: "error",
     });
   }
 });
 
-router.route('/ownsEvent').post(async (req, res) => {
+router.route("/ownsEvent").post(async (req, res) => {
   try {
     //Check if the user is logged in
     if (!req.session.user) {
       return res.send({
-        status: 'failure',
-        reason: 'notLoggedIn',
+        status: "failure",
+        reason: "notLoggedIn",
       });
     }
 
@@ -363,8 +363,8 @@ router.route('/ownsEvent').post(async (req, res) => {
 
     if (!validID) {
       return res.send({
-        status: 'failure',
-        reason: 'Invalid ID format',
+        status: "failure",
+        reason: "Invalid ID format",
       });
     }
 
@@ -378,30 +378,30 @@ router.route('/ownsEvent').post(async (req, res) => {
 
     if (dbResult.user_id !== userID) {
       return res.send({
-        status: 'success',
+        status: "success",
         owned: false,
       });
     } else {
       return res.send({
-        status: 'success',
+        status: "success",
         owned: true,
       });
     }
   } catch (error) {
     console.log(error);
     return res.send({
-      status: 'error',
+      status: "error",
     });
   }
 });
 
-router.route('/search').post(async (req, res) => {
+router.route("/search").post(async (req, res) => {
   try {
     //Check if the user is logged in
     if (!req.session.user) {
       return res.send({
-        status: 'failure',
-        reason: 'notLoggedIn',
+        status: "failure",
+        reason: "notLoggedIn",
       });
     }
     //Get the parameter
@@ -416,8 +416,8 @@ router.route('/search').post(async (req, res) => {
       )
     ) {
       return res.send({
-        status: 'failure',
-        message: 'missingParameters',
+        status: "failure",
+        message: "missingParameters",
         parameterPresenceCheckDetails: parameterPresenceCheckDetails,
       });
     }
@@ -431,8 +431,8 @@ router.route('/search').post(async (req, res) => {
       })
     ) {
       return res.send({
-        status: 'failure',
-        reason: 'invalidInputFormat',
+        status: "failure",
+        reason: "invalidInputFormat",
         validationCheckDetails: validationCheckDetails,
       });
     }
@@ -457,19 +457,19 @@ router.route('/search').post(async (req, res) => {
   } catch (err) {
     console.log(err);
     return res.send({
-      status: 'failure',
-      reason: 'internalError',
+      status: "failure",
+      reason: "internalError",
     });
   }
 });
 
-router.route('/isUserPartOfEvent').post(async (req, res) => {
+router.route("/isUserPartOfEvent").post(async (req, res) => {
   try {
     //Check if the user is logged in
     if (!req.session.user) {
       return res.send({
-        status: 'failure',
-        reason: 'notLoggedIn',
+        status: "failure",
+        reason: "notLoggedIn",
       });
     }
     //Getting the eventID of the event the user is checking they are part of
@@ -486,8 +486,8 @@ router.route('/isUserPartOfEvent').post(async (req, res) => {
       )
     ) {
       return res.send({
-        status: 'failure',
-        message: 'missingParameters',
+        status: "failure",
+        message: "missingParameters",
         parameterPresenceCheckDetails: parameterPresenceCheckDetails,
       });
     }
@@ -501,8 +501,8 @@ router.route('/isUserPartOfEvent').post(async (req, res) => {
       })
     ) {
       return res.send({
-        status: 'failure',
-        reason: 'invalidInputFormat',
+        status: "failure",
+        reason: "invalidInputFormat",
         validationCheckDetails: validationCheckDetails,
       });
     }
@@ -516,31 +516,31 @@ router.route('/isUserPartOfEvent').post(async (req, res) => {
     //If the user is already part of the event return true
     if (dbResult) {
       return res.send({
-        status: 'success',
+        status: "success",
         reason: { userIsPartOfEvent: true },
       });
     }
     //Else return false
     return res.send({
-      status: 'success',
+      status: "success",
       reason: { userIsPartOfEvent: false },
     });
   } catch (err) {
     console.log(err);
     return res.send({
-      status: 'failure',
-      reason: 'internalError',
+      status: "failure",
+      reason: "internalError",
     });
   }
 });
 
-router.route('/invertIsUserPartOfEvent').post(async (req, res) => {
+router.route("/invertIsUserPartOfEvent").post(async (req, res) => {
   try {
     //Check if the user is logged in
     if (!req.session.user) {
       return res.send({
-        status: 'failure',
-        reason: 'notLoggedIn',
+        status: "failure",
+        reason: "notLoggedIn",
       });
     }
     //Getting the eventID of the event the user is trying to invert their part of status on
@@ -557,8 +557,8 @@ router.route('/invertIsUserPartOfEvent').post(async (req, res) => {
       )
     ) {
       return res.send({
-        status: 'failure',
-        message: 'missingParameters',
+        status: "failure",
+        message: "missingParameters",
         parameterPresenceCheckDetails: parameterPresenceCheckDetails,
       });
     }
@@ -572,8 +572,8 @@ router.route('/invertIsUserPartOfEvent').post(async (req, res) => {
       })
     ) {
       return res.send({
-        status: 'failure',
-        reason: 'invalidInputFormat',
+        status: "failure",
+        reason: "invalidInputFormat",
         validationCheckDetails: validationCheckDetails,
       });
     }
@@ -592,22 +592,22 @@ router.route('/invertIsUserPartOfEvent').post(async (req, res) => {
       );
       //Send a response letting the API user know that the user was removed as a participant of that event
       return res.send({
-        status: 'success',
-        reason: 'userParticipationDeleted',
+        status: "success",
+        reason: "userParticipationDeleted",
       });
     }
     //Else add them as a participant of the event
     await tbl_event_participators.addRecord(userID, eventID);
     //Send a response letting the API user know that the user was added as a participant of that event
     return res.send({
-      status: 'success',
-      reason: 'userParticipationAdded',
+      status: "success",
+      reason: "userParticipationAdded",
     });
   } catch (err) {
     console.log(err);
     return res.send({
-      status: 'failure',
-      reason: 'internalError',
+      status: "failure",
+      reason: "internalError",
     });
   }
 });
@@ -656,6 +656,60 @@ router.route("/deleteEvent").post(async (req, res) => {
     const dbResult2 = await tbl_events.deleteEvent(eventID);
 
     return res.send({ status: "success" });
+  } catch (error) {
+    return res.send({ status: "error" });
+  }
+});
+
+router.route("/myEvents").get(async (req, res) => {
+  try {
+    //Check if the user is logged in
+    if (!req.session.user) {
+      return res.send({
+        status: "failure",
+        reason: "notLoggedIn",
+      });
+    }
+
+    const userID = req.session.user.userID;
+
+    const validID = validation.validateID(userID);
+
+    //Validate ID
+    if (!validID) {
+      return res.send({
+        status: "failure",
+        reason: "Invalid ID format",
+      });
+    }
+
+    //Find events owned by user
+    const dbResult = await tbl_events.findAllUserOwnedEvents(userID);
+
+    //Find all events participated in by user
+    const dbResult2 =
+      await tbl_event_participators.findAllUserParticipatingEvents(userID);
+
+    //Return both results
+    const object1 = dbResult.map((obj) => {
+      return {
+        eventID: obj.event_id,
+        userID: obj.user_id,
+      };
+    });
+
+    const object2 = dbResult2.map((obj) => {
+      return {
+        eventID: obj.event_id,
+        userID: obj.user_id,
+      };
+    });
+
+    console.log(object1);
+    console.log(object2);
+    const returnObject = object1.concat(object2);
+
+    return res.send({ status: "success", events: returnObject });
   } catch (error) {
     return res.send({ status: "error" });
   }
