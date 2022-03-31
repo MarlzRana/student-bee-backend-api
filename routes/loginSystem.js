@@ -123,18 +123,25 @@ router.route("/login").post(async (req, res) => {
       enteredPassword,
       actualHashedPassword
     );
-    //Get the userID of the particular user from the database
-    const userID = dbResult["user_id"];
-    //If the password is correct, create a session and return a cookie and a message letting the API user know that the login was successful
-    req.session.user = {
-      userID: userID,
-      username: enteredUsername,
-      password: actualHashedPassword,
-    };
-    return res.send({
-      status: "success",
-      reason: "validCredentials",
-    });
+    if (isCorrectPassword) {
+      //Get the userID of the particular user from the database
+      const userID = dbResult["user_id"];
+      //If the password is correct, create a session and return a cookie and a message letting the API user know that the login was successful
+      req.session.user = {
+        userID: userID,
+        username: enteredUsername,
+        password: actualHashedPassword,
+      };
+      return res.send({
+        status: "success",
+        reason: "validCredentials",
+      });
+    } else {
+      return res.send({
+        status: "failure",
+        reason: "invalidCredentials",
+      });
+    }
   } catch (err) {
     console.log(err);
     return res.send({ error: true });
@@ -315,7 +322,6 @@ router.route("/getPersonalInformation").post(async (req, res) => {
         reason: "This user does not exist",
       });
     }
-
     console.log(dbResult);
     const userID = dbResult.user_id;
     console.log(userID);
@@ -331,22 +337,37 @@ router.route("/getPersonalInformation").post(async (req, res) => {
       });
     }
 
-    console.log(dbResult2);
+    if (dbResult2.student_year === null || dbResult2.student_year === "") {
+      const returnedInformation = {
+        firstName: dbResult2.first_name,
+        lastName: dbResult2.last_name,
+        emailAddress: dbResult2.email_address,
+        dob: dbResult2.dob,
+        bio: dbResult2.bio,
+        studentYear: dbResult2.student_year,
+        courseName: dbResult2.course_name,
+      };
 
-    const returnedInformation = {
-      firstName: dbResult2.first_name,
-      lastName: dbResult2.last_name,
-      emailAddress: dbResult2.email_address,
-      dob: dbResult2.dob,
-      bio: dbResult2.bio,
-      studentYear: dbResult2.student_year,
-      courseName: dbResult2.course_name,
-    };
+      return res.send({
+        status: "success",
+        userInformation: returnedInformation,
+      });
+    } else {
+      const returnedInformation = {
+        firstName: dbResult2.first_name,
+        lastName: dbResult2.last_name,
+        emailAddress: dbResult2.email_address,
+        dob: dbResult2.dob,
+        bio: dbResult2.bio,
+        studentYear: dbResult2.student_year + " Year,",
+        courseName: dbResult2.course_name,
+      };
 
-    return res.send({
-      status: "success",
-      userInformation: returnedInformation,
-    });
+      return res.send({
+        status: "success",
+        userInformation: returnedInformation,
+      });
+    }
   } catch (error) {
     return res.send({
       status: "error",
