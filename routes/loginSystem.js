@@ -331,22 +331,37 @@ router.route("/getPersonalInformation").post(async (req, res) => {
       });
     }
 
-    console.log(dbResult2);
+    if (dbResult2.student_year === null || dbResult2.student_year === "") {
+      const returnedInformation = {
+        firstName: dbResult2.first_name,
+        lastName: dbResult2.last_name,
+        emailAddress: dbResult2.email_address,
+        dob: dbResult2.dob,
+        bio: dbResult2.bio,
+        studentYear: dbResult2.student_year,
+        courseName: dbResult2.course_name,
+      };
 
-    const returnedInformation = {
-      firstName: dbResult2.first_name,
-      lastName: dbResult2.last_name,
-      emailAddress: dbResult2.email_address,
-      dob: dbResult2.dob,
-      bio: dbResult2.bio,
-      studentYear: dbResult2.student_year,
-      courseName: dbResult2.course_name,
-    };
+      return res.send({
+        status: "success",
+        userInformation: returnedInformation,
+      });
+    } else {
+      const returnedInformation = {
+        firstName: dbResult2.first_name,
+        lastName: dbResult2.last_name,
+        emailAddress: dbResult2.email_address,
+        dob: dbResult2.dob,
+        bio: dbResult2.bio,
+        studentYear: dbResult2.student_year + " Year,",
+        courseName: dbResult2.course_name,
+      };
 
-    return res.send({
-      status: "success",
-      userInformation: returnedInformation,
-    });
+      return res.send({
+        status: "success",
+        userInformation: returnedInformation,
+      });
+    }
   } catch (error) {
     return res.send({
       status: "error",

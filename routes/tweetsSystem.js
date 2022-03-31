@@ -106,8 +106,10 @@ router.route("/get20RecentTweets").get(async (req, res) => {
             row["author_user_id"]
           );
         const howLongAgoDays = parseInt(
-          (row["tweet_posted_datetime"] - today) / (1000 * 60 * 60 * 24)
+          Math.abs(row["tweet_posted_datetime"] - today) / (1000 * 60 * 60 * 24)
         );
+        console.log("Days ago: ");
+        console.log(howLongAgoDays);
         if (howLongAgoDays < 1) {
           const howLongAgoHours = parseInt(
             (Math.abs(row["tweet_posted_datetime"] - today) /
