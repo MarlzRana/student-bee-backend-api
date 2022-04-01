@@ -1,14 +1,14 @@
-"use strict";
+'use strict';
 //Imported packages
-const express = require("express");
-const { route } = require("express/lib/router");
-require("dotenv").config();
+const express = require('express');
+const { route } = require('express/lib/router');
+require('dotenv').config();
 
 //Importing local file dependencies
-const validation = require("../validation/validation");
-const tbl_societies = require("../database/tbl_societies");
-const tbl_society_participators = require("../database/tbl_society_participators");
-const tbl_user_login_information = require("../database/tbl_user_login_information");
+const validation = require('../validation/validation');
+const tbl_societies = require('../database/tbl_societies');
+const tbl_society_participators = require('../database/tbl_society_participators');
+const tbl_user_login_information = require('../database/tbl_user_login_information');
 //Environmental variables
 
 //Package setup
@@ -17,20 +17,20 @@ router.use(express.json());
 router.use(express.urlencoded({ extended: true }));
 
 //A default gateway to test if API server is accessible
-router.route("/").get((req, res) => {
+router.route('/').get((req, res) => {
   return res.send({
     message:
-      "Default gateway of student-bee-backend-api route:/societiesSystem",
+      'Default gateway of student-bee-backend-api route:/societiesSystem',
   });
 });
 
-router.route("/add").post(async (req, res) => {
+router.route('/add').post(async (req, res) => {
   try {
     //Check if the user is logged in
     if (!req.session.user) {
       return res.send({
-        status: "failure",
-        message: "notLoggedIn",
+        status: 'failure',
+        message: 'notLoggedIn',
       });
     }
     //Get the parameters provided in the response
@@ -50,7 +50,6 @@ router.route("/add").post(async (req, res) => {
       societyDescriptionIn:
         societyDescriptionIn !== null && societyDescriptionIn !== undefined,
     };
-    console.log();
 
     if (
       !Object.keys(parameterPresenceCheckDetails).every((key) => {
@@ -58,8 +57,8 @@ router.route("/add").post(async (req, res) => {
       })
     ) {
       return res.send({
-        status: "failure",
-        message: "missingParameters",
+        status: 'failure',
+        message: 'missingParameters',
         parameterPresenceCheckDetails: parameterPresenceCheckDetails,
       });
     }
@@ -77,8 +76,8 @@ router.route("/add").post(async (req, res) => {
       })
     ) {
       return res.send({
-        status: "failure",
-        reason: "invalidInputFormat",
+        status: 'failure',
+        reason: 'invalidInputFormat',
         validationCheckDetails: validationCheckDetails,
       });
     }
@@ -91,59 +90,56 @@ router.route("/add").post(async (req, res) => {
       societyDescriptionIn
     );
     return res.send({
-      status: "success",
-      message: "societyAdded",
+      status: 'success',
+      message: 'societyAdded',
     });
   } catch (err) {
     console.log(err);
     return res.send({
-      status: "failure",
-      reason: "internalError",
+      status: 'failure',
+      reason: 'internalError',
     });
   }
 });
 
 //Get the most recent societies from tbl_societies
-router.route("/10RandomSocieties").get(async (req, res) => {
+router.route('/10RandomSocieties').get(async (req, res) => {
   try {
     //Check if the user is logged in
     if (!req.session.user) {
       return res.send({
-        status: "failure",
-        reason: "notLoggedIn",
+        status: 'failure',
+        reason: 'notLoggedIn',
       });
     }
 
     const dbResult = await tbl_societies.get10RandomSocieties();
-    console.log(dbResult);
 
     const arrOfObjToSend = await Promise.all(
       dbResult.map(async (row) => {
         return {
-          societyID: row["society_id"],
-          societyName: row["name"],
+          societyID: row['society_id'],
+          societyName: row['name'],
         };
       })
     );
-    // return res.send(arrOfObjToSend);
-    console.log(arrOfObjToSend);
-    return res.send({ status: "success", returnObjects: arrOfObjToSend });
+    return res.send({ status: 'success', returnObjects: arrOfObjToSend });
   } catch (err) {
     console.log(err);
     return res.send({
-      status: "failure",
-      reason: "internalError",
+      status: 'failure',
+      reason: 'internalError',
     });
   }
 });
 
-router.route("/getSocietyDetails").post(async (req, res) => {
+router.route('/getSocietyDetails').post(async (req, res) => {
   try {
     //Check if the user is logged in
     if (!req.session.user) {
       return res.send({
-        status: "failure",
-        reason: "notLoggedIn",
+        status: 'failure',
+        reason: 'notLoggedIn',
       });
     }
 
@@ -154,19 +150,18 @@ router.route("/getSocietyDetails").post(async (req, res) => {
 
     if (!validID) {
       return res.send({
-        status: "failure",
-        reason: "Invalid ID format",
+        status: 'failure',
+        reason: 'Invalid ID format',
       });
     }
 
     const dbResult = await tbl_societies.getSocietyInformation(
       enteredSocietyID
     );
-    console.log(dbResult);
     if (dbResult === undefined) {
       return res.send({
-        status: "failure",
-        reason: "This society does not exist",
+        status: 'failure',
+        reason: 'This society does not exist',
       });
     }
 
@@ -180,24 +175,24 @@ router.route("/getSocietyDetails").post(async (req, res) => {
     };
 
     return res.send({
-      status: "success",
+      status: 'success',
       societyInformation: returnedInformation,
     });
   } catch (error) {
     console.log(error);
     return res.send({
-      status: "error",
+      status: 'error',
     });
   }
 });
 
-router.route("/editSocietyDetails").post(async (req, res) => {
+router.route('/editSocietyDetails').post(async (req, res) => {
   try {
     //Check if the user is logged in
     if (!req.session.user) {
       return res.send({
-        status: "failure",
-        message: "notLoggedIn",
+        status: 'failure',
+        message: 'notLoggedIn',
       });
     }
     //Get the parameters provided in the response
@@ -218,7 +213,6 @@ router.route("/editSocietyDetails").post(async (req, res) => {
       societyDescriptionIn:
         societyDescriptionIn !== null && societyDescriptionIn !== undefined,
     };
-    console.log();
 
     if (
       !Object.keys(parameterPresenceCheckDetails).every((key) => {
@@ -226,8 +220,8 @@ router.route("/editSocietyDetails").post(async (req, res) => {
       })
     ) {
       return res.send({
-        status: "failure",
-        message: "missingParameters",
+        status: 'failure',
+        message: 'missingParameters',
         parameterPresenceCheckDetails: parameterPresenceCheckDetails,
       });
     }
@@ -245,8 +239,8 @@ router.route("/editSocietyDetails").post(async (req, res) => {
       })
     ) {
       return res.send({
-        status: "failure",
-        reason: "invalidInputFormat",
+        status: 'failure',
+        reason: 'invalidInputFormat',
         validationCheckDetails: validationCheckDetails,
       });
     }
@@ -256,16 +250,16 @@ router.route("/editSocietyDetails").post(async (req, res) => {
 
     if (!validID) {
       return res.send({
-        status: "failure",
-        reason: "Invalid ID format",
+        status: 'failure',
+        reason: 'Invalid ID format',
       });
     }
 
     const dbResult = await tbl_societies.getSocietyInformation(societyIDIn);
     if (dbResult === undefined) {
       return res.send({
-        status: "failure",
-        reason: "This society does not exist",
+        status: 'failure',
+        reason: 'This society does not exist',
       });
     }
 
@@ -273,8 +267,8 @@ router.route("/editSocietyDetails").post(async (req, res) => {
     const userID = req.session.user.userID;
     if (dbResult.leader_user_id !== userID) {
       return res.send({
-        status: "failure",
-        reason: "You do not own this society",
+        status: 'failure',
+        reason: 'You do not own this society',
       });
     }
 
@@ -288,24 +282,24 @@ router.route("/editSocietyDetails").post(async (req, res) => {
     );
 
     return res.send({
-      status: "success",
-      message: "Society successfully edited",
+      status: 'success',
+      message: 'Society successfully edited',
     });
   } catch (error) {
     console.log(error);
     return res.send({
-      status: "error",
+      status: 'error',
     });
   }
 });
 
-router.route("/ownsSociety").post(async (req, res) => {
+router.route('/ownsSociety').post(async (req, res) => {
   try {
     //Check if the user is logged in
     if (!req.session.user) {
       return res.send({
-        status: "failure",
-        reason: "notLoggedIn",
+        status: 'failure',
+        reason: 'notLoggedIn',
       });
     }
 
@@ -317,45 +311,45 @@ router.route("/ownsSociety").post(async (req, res) => {
 
     if (!validID) {
       return res.send({
-        status: "failure",
-        reason: "Invalid ID format",
+        status: 'failure',
+        reason: 'Invalid ID format',
       });
     }
 
     const dbResult = await tbl_societies.getSocietyInformation(societyID);
     if (dbResult === undefined) {
       return res.send({
-        status: "failure",
-        reason: "This society does not exist",
+        status: 'failure',
+        reason: 'This society does not exist',
       });
     }
 
     if (dbResult.leader_user_id !== userID) {
       return res.send({
-        status: "success",
+        status: 'success',
         owned: false,
       });
     } else {
       return res.send({
-        status: "success",
+        status: 'success',
         owned: true,
       });
     }
   } catch (error) {
     console.log(error);
     return res.send({
-      status: "error",
+      status: 'error',
     });
   }
 });
 
-router.route("/search").post(async (req, res) => {
+router.route('/search').post(async (req, res) => {
   try {
     //Check if the user is logged in
     if (!req.session.user) {
       return res.send({
-        status: "failure",
-        reason: "notLoggedIn",
+        status: 'failure',
+        reason: 'notLoggedIn',
       });
     }
     //Get the parameter
@@ -370,8 +364,8 @@ router.route("/search").post(async (req, res) => {
       )
     ) {
       return res.send({
-        status: "failure",
-        message: "missingParameters",
+        status: 'failure',
+        message: 'missingParameters',
         parameterPresenceCheckDetails: parameterPresenceCheckDetails,
       });
     }
@@ -385,8 +379,8 @@ router.route("/search").post(async (req, res) => {
       })
     ) {
       return res.send({
-        status: "failure",
-        reason: "invalidInputFormat",
+        status: 'failure',
+        reason: 'invalidInputFormat',
         validationCheckDetails: validationCheckDetails,
       });
     }
@@ -407,19 +401,19 @@ router.route("/search").post(async (req, res) => {
   } catch (err) {
     console.log(err);
     return res.send({
-      status: "failure",
-      reason: "internalError",
+      status: 'failure',
+      reason: 'internalError',
     });
   }
 });
 
-router.route("/isUserPartOfSociety").post(async (req, res) => {
+router.route('/isUserPartOfSociety').post(async (req, res) => {
   try {
     //Check if the user is logged in
     if (!req.session.user) {
       return res.send({
-        status: "failure",
-        reason: "notLoggedIn",
+        status: 'failure',
+        reason: 'notLoggedIn',
       });
     }
     //Getting the societyID of the society the user is checking they are part of
@@ -436,8 +430,8 @@ router.route("/isUserPartOfSociety").post(async (req, res) => {
       )
     ) {
       return res.send({
-        status: "failure",
-        message: "missingParameters",
+        status: 'failure',
+        message: 'missingParameters',
         parameterPresenceCheckDetails: parameterPresenceCheckDetails,
       });
     }
@@ -451,8 +445,8 @@ router.route("/isUserPartOfSociety").post(async (req, res) => {
       })
     ) {
       return res.send({
-        status: "failure",
-        reason: "invalidInputFormat",
+        status: 'failure',
+        reason: 'invalidInputFormat',
         validationCheckDetails: validationCheckDetails,
       });
     }
@@ -466,31 +460,31 @@ router.route("/isUserPartOfSociety").post(async (req, res) => {
     //If the user is already part of the society return true
     if (dbResult) {
       return res.send({
-        status: "success",
+        status: 'success',
         reason: { userIsPartOfSociety: true },
       });
     }
     //Else return false
     return res.send({
-      status: "success",
+      status: 'success',
       reason: { userIsPartOfSociety: false },
     });
   } catch (err) {
     console.log(err);
     return res.send({
-      status: "failure",
-      reason: "internalError",
+      status: 'failure',
+      reason: 'internalError',
     });
   }
 });
 
-router.route("/invertIsUserPartOfSociety").post(async (req, res) => {
+router.route('/invertIsUserPartOfSociety').post(async (req, res) => {
   try {
     //Check if the user is logged in
     if (!req.session.user) {
       return res.send({
-        status: "failure",
-        reason: "notLoggedIn",
+        status: 'failure',
+        reason: 'notLoggedIn',
       });
     }
     //Getting the societyID of the society the user is trying to invert their part of status on
@@ -507,8 +501,8 @@ router.route("/invertIsUserPartOfSociety").post(async (req, res) => {
       )
     ) {
       return res.send({
-        status: "failure",
-        message: "missingParameters",
+        status: 'failure',
+        message: 'missingParameters',
         parameterPresenceCheckDetails: parameterPresenceCheckDetails,
       });
     }
@@ -522,8 +516,8 @@ router.route("/invertIsUserPartOfSociety").post(async (req, res) => {
       })
     ) {
       return res.send({
-        status: "failure",
-        reason: "invalidInputFormat",
+        status: 'failure',
+        reason: 'invalidInputFormat',
         validationCheckDetails: validationCheckDetails,
       });
     }
@@ -542,33 +536,33 @@ router.route("/invertIsUserPartOfSociety").post(async (req, res) => {
       );
       //Send a response letting the API user know that the user was removed as a participant of that society
       return res.send({
-        status: "success",
-        reason: "userParticipationDeleted",
+        status: 'success',
+        reason: 'userParticipationDeleted',
       });
     }
     //Else add them as a participant of the society
     await tbl_society_participators.addRecord(userID, societyID);
     //Send a response letting the API user know that the user was added as a participant of that society
     return res.send({
-      status: "success",
-      reason: "userParticipationAdded",
+      status: 'success',
+      reason: 'userParticipationAdded',
     });
   } catch (err) {
     console.log(err);
     return res.send({
-      status: "failure",
-      reason: "internalError",
+      status: 'failure',
+      reason: 'internalError',
     });
   }
 });
 
-router.route("/deleteSociety").post(async (req, res) => {
+router.route('/deleteSociety').post(async (req, res) => {
   try {
     //Check if the user is logged in
     if (!req.session.user) {
       return res.send({
-        status: "failure",
-        reason: "notLoggedIn",
+        status: 'failure',
+        reason: 'notLoggedIn',
       });
     }
 
@@ -580,28 +574,25 @@ router.route("/deleteSociety").post(async (req, res) => {
     //Validate ID
     if (!validID) {
       return res.send({
-        status: "failure",
-        reason: "Invalid ID format",
+        status: 'failure',
+        reason: 'Invalid ID format',
       });
     }
 
     //Check if society exists
     const dbResult = await tbl_societies.getSocietyInformation(societyID);
 
-    console.log("User ID: " + userID);
-    console.log("DBResult: " + dbResult.leader_user_id);
-
     if (dbResult === undefined) {
       return res.send({
-        status: "failure",
-        reason: "This society does not exist",
+        status: 'failure',
+        reason: 'This society does not exist',
       });
     }
 
     //Check if user owns society
     if (dbResult.leader_user_id !== userID) {
       return res.send({
-        status: "failure",
+        status: 'failure',
         owned: false,
       });
     }
@@ -609,19 +600,19 @@ router.route("/deleteSociety").post(async (req, res) => {
     //Delete if they do
     const dbResult2 = await tbl_societies.deleteSociety(societyID);
 
-    return res.send({ status: "success" });
+    return res.send({ status: 'success' });
   } catch (error) {
-    return res.send({ status: "error" });
+    return res.send({ status: 'error' });
   }
 });
 
-router.route("/mySocieties").get(async (req, res) => {
+router.route('/mySocieties').get(async (req, res) => {
   try {
     //Check if the user is logged in
     if (!req.session.user) {
       return res.send({
-        status: "failure",
-        reason: "notLoggedIn",
+        status: 'failure',
+        reason: 'notLoggedIn',
       });
     }
 
@@ -632,8 +623,8 @@ router.route("/mySocieties").get(async (req, res) => {
     //Validate ID
     if (!validID) {
       return res.send({
-        status: "failure",
-        reason: "Invalid ID format",
+        status: 'failure',
+        reason: 'Invalid ID format',
       });
     }
 
@@ -658,15 +649,12 @@ router.route("/mySocieties").get(async (req, res) => {
         userID: obj.user_id,
       };
     });
-
-    console.log(object1);
-    console.log(object2);
     const returnObject = object1.concat(object2);
 
-    return res.send({ status: "success", societies: returnObject });
+    return res.send({ status: 'success', societies: returnObject });
   } catch (error) {
     console.log(error);
-    return res.send({ status: "error" });
+    return res.send({ status: 'error' });
   }
 });
 
